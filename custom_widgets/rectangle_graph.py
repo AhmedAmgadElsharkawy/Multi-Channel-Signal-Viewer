@@ -12,6 +12,9 @@ class RectangleGraph(QWidget):
         # self.setStyleSheet("background-color:red")
         self.signals = []
         self.xLimit = 0
+        self.isRunning = True
+        self.signalSpeed = 20
+        self.timer = QTimer(self)
         self.curves = []
         self.colors = [
             (255, 0, 0),     # Red
@@ -44,6 +47,7 @@ class RectangleGraph(QWidget):
         rectangle_signal_conntrols_widget.setLayout(rectangle_plot1_controls)
         rectangle_plot1_controls.setAlignment(Qt.AlignmentFlag.AlignTop)
         rectangle_signal_conntrols_widget.setFixedSize(100,200)
+        self.rectangle_plot1.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
 
         self.signals_list1 = QScrollArea()
         self.signals_list1.setFixedSize(150,200)
@@ -78,6 +82,10 @@ class RectangleGraph(QWidget):
 
         # Connect insert button to file browser
         self.insert_button1.clicked.connect(self.browse_file)
+        self.pause_button1.clicked.connect(self.pauseSignals)
+        self.play_button1.clicked.connect(self.playSignals)
+        self.speed_up_button1.clicked.connect(self.increaseSpeed)
+        self.speed_down_button1.clicked.connect(self.decreaseSpeed)
 
     def add_signal(self, file_path):
         # Read CSV file
@@ -88,7 +96,9 @@ class RectangleGraph(QWidget):
         if len(signal.x) > self.xLimit:
             self.xLimit = len(signal.x)
         self.signals.append(signal)
-        print(self.signals)
+        self.isRunning = True
+        self.timer.stop()
+        self.signalSpeed = 20
         
         self.ptr = 0
 
@@ -97,27 +107,24 @@ class RectangleGraph(QWidget):
         curve = self.rectangle_plot1.plot(pen=pg.mkPen(color=self.colors[len(self.curves)%len(self.colors)]))
         self.curves.append(curve)
         self.rectangle_plot1.setLabel('bottom', 'Time', 's')
-        self.rectangle_plot1.setXRange(0, 1.1)  # Initial range
+        self.rectangle_plot1.setXRange(0, 1)  # Initial range
         self.rectangle_plot1.setYRange(-0.7, 0.7)
 
         # Set up the QTimer
-        self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_plot)
-        self.timer.start(10)  # 50 milliseconds
-
-
+        self.timer.start(20)  # 50 milliseconds
         
 
     def update_plot(self):
-        if self.ptr < self.xLimit:
+        if self.ptr < self.xLimit and self.isRunning:
             for i, signal in enumerate(self.signals):
                 if len(signal.x) >= self.ptr:
                     self.curves[i].setData(signal.x[:self.ptr], signal.y[:self.ptr])  # Update each curve
+                    if self.ptr / 1000 > 1:
+                        self.rectangle_plot1.setLimits(xMin=0, xMax=((self.ptr / 1000)), yMin=-2, yMax=2)
             self.ptr += 1
-            if self.ptr > 1100:
-                self.rectangle_plot1.setXRange((self.ptr / 1000) - 1.1, self.ptr / 1000)
-        else:
-            self.timer.stop()
+            if self.ptr > 1000:
+                self.rectangle_plot1.setXRange((self.ptr / 1000) - 1, self.ptr / 1000)
 
     def browse_file(self):
         # Open file dialog to select a CSV file
@@ -130,4 +137,30 @@ class RectangleGraph(QWidget):
     def plot(self):
         for signal in self.signals:
             self.rectangle_plot1.plot(signal.y)
+
+    def pauseSignals(self):
+        self.isRunning = False
+
+    def playSignals(self):
+        self.isRunning = True
+
+    def increaseSpeed(self):
+        self.timer.stop()
+        if (self.signalSpeed > 5):
+            self.signalSpeed = int(self.signalSpeed / 2)
+            print(self.signalSpeed)
+        elif (self.signalSpeed == 5):
+            self.signalSpeed = int(self.signalSpeed / 5)
+            print(self.signalSpeed)
+        self.timer.start(self.signalSpeed)
+
+    def decreaseSpeed(self):
+        self.timer.stop()
+        if (self.signalSpeed == 1):
+            self.signalSpeed = int(self.signalSpeed * 5)
+            print(self.signalSpeed)
+        elif (self.signalSpeed < 40):
+            self.signalSpeed = int(self.signalSpeed * 2)
+            print(self.signalSpeed)
+        self.timer.start(self.signalSpeed)
 
