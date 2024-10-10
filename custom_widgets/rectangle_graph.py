@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog,QScrollArea
 import pyqtgraph as pg
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt,QTimer
 import pandas as pd
 from custom_widgets.signal import Signal
 
@@ -11,7 +11,20 @@ class RectangleGraph(QWidget):
         self.initUI()
         # self.setStyleSheet("background-color:red")
         self.signals = []
-        self.xLimit = 4
+        self.xLimit = 0
+        self.curves = []
+        self.colors = [
+            (255, 0, 0),     # Red
+            (0, 255, 0),     # Green
+            (0, 0, 255),     # Blue
+            (255, 255, 0),   # Yellow
+            (255, 0, 255),   # Magenta
+            (0, 255, 255),   # Cyan
+            (128, 0, 128),   # Purple
+            (255, 165, 0),   # Orange
+            (0, 128, 128),   # Teal
+            (128, 128, 0)    # Olive
+        ]
 
     def initUI(self):
         main_layout = QVBoxLayout()
@@ -39,12 +52,19 @@ class RectangleGraph(QWidget):
         # Create buttons
         self.insert_button1 = QPushButton("Insert")
         self.play_button1 = QPushButton("Play")
-        self.stop_button1 = QPushButton("Stop")
+        self.pause_button1 = QPushButton("Pause")
+        self.clear_button1 = QPushButton("Clear")
+        self.speed_up_button1 = QPushButton("Speed Up")
+        self.speed_down_button1 = QPushButton("Speed Down")
 
         # Add buttons to the layout
         rectangle_plot1_controls.addWidget(self.insert_button1)
         rectangle_plot1_controls.addWidget(self.play_button1)
-        rectangle_plot1_controls.addWidget(self.stop_button1)
+        rectangle_plot1_controls.addWidget(self.pause_button1)
+        rectangle_plot1_controls.addWidget(self.clear_button1)
+        rectangle_plot1_controls.addWidget(self.speed_up_button1)
+        rectangle_plot1_controls.addWidget(self.speed_down_button1)
+
 
         # Add plot and controls to the container
         rectangle_and_controls_container.addWidget(self.rectangle_plot1)
@@ -65,12 +85,39 @@ class RectangleGraph(QWidget):
             pass
 
         signal  = Signal(file_path,len(self.signals))
-        if signal.MaxX > self.xLimit:
-            self.xLimit = signal.MaxX
+        if len(signal.x) > self.xLimit:
+            self.xLimit = len(signal.x)
         self.signals.append(signal)
         print(self.signals)
-        self.plot()
         
+        self.ptr = 0
+
+        # self.rectangle_plot1.clear() 
+
+        curve = self.rectangle_plot1.plot(pen=pg.mkPen(color=self.colors[len(self.curves)%len(self.colors)]))
+        self.curves.append(curve)
+        self.rectangle_plot1.setLabel('bottom', 'Time', 's')
+        self.rectangle_plot1.setXRange(0, 1.1)  # Initial range
+        self.rectangle_plot1.setYRange(-0.7, 0.7)
+
+        # Set up the QTimer
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_plot)
+        self.timer.start(10)  # 50 milliseconds
+
+
+        
+
+    def update_plot(self):
+        if self.ptr < self.xLimit:
+            for i, signal in enumerate(self.signals):
+                if len(signal.x) >= self.ptr:
+                    self.curves[i].setData(signal.x[:self.ptr], signal.y[:self.ptr])  # Update each curve
+            self.ptr += 1
+            if self.ptr > 1100:
+                self.rectangle_plot1.setXRange((self.ptr / 1000) - 1.1, self.ptr / 1000)
+        else:
+            self.timer.stop()
 
     def browse_file(self):
         # Open file dialog to select a CSV file

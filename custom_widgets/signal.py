@@ -9,7 +9,6 @@ class Signal(QWidget):
         data = pd.read_csv(file_path).iloc[:,0:2]
         self.x = data.iloc[:,0]
         self.y = data.iloc[:,1]
-        self.MaxX = self.x.iloc[-1]
 
 
         
