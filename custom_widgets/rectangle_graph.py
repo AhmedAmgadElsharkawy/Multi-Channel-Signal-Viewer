@@ -58,6 +58,7 @@ class RectangleGraph(QWidget):
         self.play_button1 = QPushButton("Play")
         self.pause_button1 = QPushButton("Pause")
         self.clear_button1 = QPushButton("Clear")
+        self.rewind_button1 = QPushButton("Rewind")
         self.speed_up_button1 = QPushButton("Speed Up")
         self.speed_down_button1 = QPushButton("Speed Down")
 
@@ -65,6 +66,7 @@ class RectangleGraph(QWidget):
         rectangle_plot1_controls.addWidget(self.insert_button1)
         rectangle_plot1_controls.addWidget(self.play_button1)
         rectangle_plot1_controls.addWidget(self.pause_button1)
+        rectangle_plot1_controls.addWidget(self.rewind_button1)
         rectangle_plot1_controls.addWidget(self.clear_button1)
         rectangle_plot1_controls.addWidget(self.speed_up_button1)
         rectangle_plot1_controls.addWidget(self.speed_down_button1)
@@ -86,6 +88,8 @@ class RectangleGraph(QWidget):
         self.play_button1.clicked.connect(self.playSignals)
         self.speed_up_button1.clicked.connect(self.increaseSpeed)
         self.speed_down_button1.clicked.connect(self.decreaseSpeed)
+        self.clear_button1.clicked.connect(self.clearSignals)
+        self.rewind_button1.clicked.connect(self.rewindSignals)
 
     def add_signal(self, file_path):
         # Read CSV file
@@ -108,11 +112,11 @@ class RectangleGraph(QWidget):
         self.curves.append(curve)
         self.rectangle_plot1.setLabel('bottom', 'Time', 's')
         self.rectangle_plot1.setXRange(0, 1)  # Initial range
-        self.rectangle_plot1.setYRange(-0.7, 0.7)
+        self.rectangle_plot1.setYRange(-1, 1)
 
         # Set up the QTimer
         self.timer.timeout.connect(self.update_plot)
-        self.timer.start(20)  # 50 milliseconds
+        self.timer.start(self.signalSpeed)  # 50 milliseconds
         
 
     def update_plot(self):
@@ -148,19 +152,29 @@ class RectangleGraph(QWidget):
         self.timer.stop()
         if (self.signalSpeed > 5):
             self.signalSpeed = int(self.signalSpeed / 2)
-            print(self.signalSpeed)
         elif (self.signalSpeed == 5):
             self.signalSpeed = int(self.signalSpeed / 5)
-            print(self.signalSpeed)
         self.timer.start(self.signalSpeed)
 
     def decreaseSpeed(self):
         self.timer.stop()
         if (self.signalSpeed == 1):
             self.signalSpeed = int(self.signalSpeed * 5)
-            print(self.signalSpeed)
         elif (self.signalSpeed < 40):
             self.signalSpeed = int(self.signalSpeed * 2)
-            print(self.signalSpeed)
         self.timer.start(self.signalSpeed)
 
+    def clearSignals(self):
+        self.signals.clear()
+        self.curves.clear()
+        self.rectangle_plot1.clear() 
+        self.rectangle_plot1.setXRange(0, 1)  # Initial range
+        self.rectangle_plot1.setYRange(-1, 1)
+        self.rectangle_plot1.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
+        self.timer.stop()
+
+    def rewindSignals(self):
+        self.ptr = 0
+        self.rectangle_plot1.setXRange(0, 1)  # Initial range
+        self.rectangle_plot1.setYRange(-1, 1)
+        self.rectangle_plot1.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
