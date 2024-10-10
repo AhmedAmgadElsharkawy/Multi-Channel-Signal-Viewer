@@ -2,6 +2,7 @@ import sys
 from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QHBoxLayout,QGridLayout,QWidget,QLabel
 
 from custom_widgets.example import Example
+from custom_widgets.rectangle_graph import RectangleGraph
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -20,8 +21,8 @@ class MainWindow(QMainWindow):
         # main_layout.addWidget(example)
 
         # add your custom widgets below
-
-
+        rectangle_plots = RectangleGraph()
+        main_layout.addWidget(rectangle_plots)
         
 
         # set main layout of central widget
