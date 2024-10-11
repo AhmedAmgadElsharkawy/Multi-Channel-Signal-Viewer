@@ -213,6 +213,8 @@ class RectangleGraph(QWidget):
             self.rectangle_plot1.plot(signal.y)
 
     def pauseSignals(self):
+        print(self.rectangle_plot1.getViewBox().viewRange()[1])
+
         self.isRunning = False
 
     def playSignals(self):
