@@ -13,6 +13,9 @@ class RectangleGraph(QWidget):
         # self.setStyleSheet("background-color:red")
         self.signals = []
         self.xLimit = 0
+        self.isRunning = True
+        self.signalSpeed = 20
+        self.timer = QTimer(self)
         self.curves = []
         self.timer = QTimer(self)
         self.selected_signal = None
@@ -47,7 +50,8 @@ class RectangleGraph(QWidget):
         rectangle_plot1_controls = QVBoxLayout()
         rectangle_signal_conntrols_widget.setLayout(rectangle_plot1_controls)
         rectangle_plot1_controls.setAlignment(Qt.AlignmentFlag.AlignTop)
-        # rectangle_signal_conntrols_widget.setFixedSize(100,200)
+        rectangle_signal_conntrols_widget.setFixedSize(100,200)
+        self.rectangle_plot1.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
 
         self.signals_props1_widget = QWidget()
         signals_props1_layout = QVBoxLayout()
@@ -127,6 +131,7 @@ class RectangleGraph(QWidget):
         self.play_button1 = QPushButton("Play")
         self.pause_button1 = QPushButton("Pause")
         self.clear_button1 = QPushButton("Clear")
+        self.rewind_button1 = QPushButton("Rewind")
         self.speed_up_button1 = QPushButton("Speed Up")
         self.speed_down_button1 = QPushButton("Speed Down")
 
@@ -134,6 +139,7 @@ class RectangleGraph(QWidget):
         rectangle_plot1_controls.addWidget(self.insert_button1)
         rectangle_plot1_controls.addWidget(self.play_button1)
         rectangle_plot1_controls.addWidget(self.pause_button1)
+        rectangle_plot1_controls.addWidget(self.rewind_button1)
         rectangle_plot1_controls.addWidget(self.clear_button1)
         rectangle_plot1_controls.addWidget(self.speed_up_button1)
         rectangle_plot1_controls.addWidget(self.speed_down_button1)
@@ -151,6 +157,12 @@ class RectangleGraph(QWidget):
 
         # Connect insert button to file browser
         self.insert_button1.clicked.connect(self.browse_file)
+        self.pause_button1.clicked.connect(self.pauseSignals)
+        self.play_button1.clicked.connect(self.playSignals)
+        self.speed_up_button1.clicked.connect(self.increaseSpeed)
+        self.speed_down_button1.clicked.connect(self.decreaseSpeed)
+        self.clear_button1.clicked.connect(self.clearSignals)
+        self.rewind_button1.clicked.connect(self.rewindSignals)
 
     def add_signal(self, file_path):
         if not file_path:
@@ -160,17 +172,22 @@ class RectangleGraph(QWidget):
             self.xLimit = len(signal.x)
         signal.color = self.colors[len(self.signals)%len(self.colors)]
         self.signals.append(signal)
+        self.isRunning = True
+        self.timer.stop()
+        self.signalSpeed = 20
         self.signals_combobox1.addItem(signal.label,userData=len(self.signals)-1)
+
+        
         self.ptr = 0
         curve = self.rectangle_plot1.plot(pen=pg.mkPen(color=signal.color))
         self.curves.append(curve)
         self.rectangle_plot1.setLabel('bottom', 'Time', 's')
-        self.rectangle_plot1.setXRange(0, 1.1)  # Initial range
-        self.rectangle_plot1.setYRange(-0.7, 0.7)
+        self.rectangle_plot1.setXRange(0, 1)  # Initial range
+        self.rectangle_plot1.setYRange(-1, 1)
+
+        # Set up the QTimer
         self.timer.timeout.connect(self.update_plot)
-        self.timer.start(10)  # 50 milliseconds
-
-
+        self.timer.start(self.signalSpeed)  # 50 milliseconds
         
 
     def update_plot(self):
@@ -180,10 +197,8 @@ class RectangleGraph(QWidget):
                     if len(self.signals[i].x) >= self.ptr:
                         curve.setData(self.signals[i].x[:self.ptr], self.signals[i].y[:self.ptr])  # Update each curve
             self.ptr += 1
-            if self.ptr > 1100:
-                self.rectangle_plot1.setXRange((self.ptr / 1000) - 1.1, self.ptr / 1000)
-        else:
-            self.timer.stop()
+            if self.ptr > 1000:
+                self.rectangle_plot1.setXRange((self.ptr / 1000) - 1, self.ptr / 1000)
 
     def browse_file(self):
         file_dialog = QFileDialog(self)
@@ -195,6 +210,42 @@ class RectangleGraph(QWidget):
         for signal in self.signals:
             self.rectangle_plot1.plot(signal.y)
 
+    def pauseSignals(self):
+        self.isRunning = False
+
+    def playSignals(self):
+        self.isRunning = True
+
+    def increaseSpeed(self):
+        self.timer.stop()
+        if (self.signalSpeed > 5):
+            self.signalSpeed = int(self.signalSpeed / 2)
+        elif (self.signalSpeed == 5):
+            self.signalSpeed = int(self.signalSpeed / 5)
+        self.timer.start(self.signalSpeed)
+
+    def decreaseSpeed(self):
+        self.timer.stop()
+        if (self.signalSpeed == 1):
+            self.signalSpeed = int(self.signalSpeed * 5)
+        elif (self.signalSpeed < 40):
+            self.signalSpeed = int(self.signalSpeed * 2)
+        self.timer.start(self.signalSpeed)
+
+    def clearSignals(self):
+        self.signals.clear()
+        self.curves.clear()
+        self.rectangle_plot1.clear() 
+        self.rectangle_plot1.setXRange(0, 1)  # Initial range
+        self.rectangle_plot1.setYRange(-1, 1)
+        self.rectangle_plot1.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
+        self.timer.stop()
+
+    def rewindSignals(self):
+        self.ptr = 0
+        self.rectangle_plot1.setXRange(0, 1)  # Initial range
+        self.rectangle_plot1.setYRange(-1, 1)
+        self.rectangle_plot1.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
     def on_signal_selected(self):
         signal_index = self.signals_combobox1.currentIndex()
         if(signal_index < 0): 
