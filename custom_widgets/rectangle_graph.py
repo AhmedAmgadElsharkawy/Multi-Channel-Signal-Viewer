@@ -191,11 +191,13 @@ class RectangleGraph(QWidget):
         
 
     def update_plot(self):
-        if self.ptr < self.xLimit:
+        if self.ptr < self.xLimit and self.isRunning:
             for i, curve in enumerate(self.curves):
                 if self.signals[i].show:
                     if len(self.signals[i].x) >= self.ptr:
                         curve.setData(self.signals[i].x[:self.ptr], self.signals[i].y[:self.ptr])  # Update each curve
+                        if self.ptr / 1000 > 1:
+                            self.rectangle_plot1.setLimits(xMin=0, xMax=((self.ptr / 1000)), yMin=-2, yMax=2)
             self.ptr += 1
             if self.ptr > 1000:
                 self.rectangle_plot1.setXRange((self.ptr / 1000) - 1, self.ptr / 1000)
@@ -239,6 +241,7 @@ class RectangleGraph(QWidget):
         self.rectangle_plot1.setXRange(0, 1)  # Initial range
         self.rectangle_plot1.setYRange(-1, 1)
         self.rectangle_plot1.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
+        self.signals_combobox1.clear()
         self.timer.stop()
 
     def rewindSignals(self):
