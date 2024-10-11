@@ -63,14 +63,17 @@ class MainWindow(QMainWindow):
             self.play_link = QPushButton("Play", self)
             self.speed_up_link = QPushButton("Speed up", self)
             self.speed_down_link = QPushButton("Speed down", self)
+            self.rewind_link = QPushButton("Rewind", self)
             self.link_options.addWidget(self.pause_link)
             self.link_options.addWidget(self.play_link)
+            self.link_options.addWidget(self.rewind_link)
             self.link_options.addWidget(self.speed_up_link)
             self.link_options.addWidget(self.speed_down_link)
             self.pause_link.clicked.connect(self.pasue_linked_signals)
             self.play_link.clicked.connect(self.play_linked_signals)
             self.speed_up_link.clicked.connect(self.speed_up_linked_signals)
             self.speed_down_link.clicked.connect(self.speed_down_linked_signals)
+            self.rewind_link.clicked.connect(self.rewind_linked_signals)
             self.rectangle_plot1.rewindSignals()
             self.rectangle_plot2.rewindSignals()
         else:
@@ -106,6 +109,10 @@ class MainWindow(QMainWindow):
     def speed_down_linked_signals(self):
         self.rectangle_plot1.decreaseSpeed()
         self.rectangle_plot2.decreaseSpeed()
+
+    def rewind_linked_signals(self):
+        self.rectangle_plot1.rewindSignals()
+        self.rectangle_plot2.rewindSignals()
 
     def remove_option_widgets(self):
         while self.link_options.count():
