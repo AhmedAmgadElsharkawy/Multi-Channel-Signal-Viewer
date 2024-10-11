@@ -24,10 +24,6 @@ class MainWindow(QMainWindow):
         self.rectangle_plots = RectangleGraph()
         self.link_h_box = QHBoxLayout()
         self.link_options = QHBoxLayout()
-        self.pause_link = QPushButton("Pause", self)
-        self.play_link = QPushButton("Play", self)
-        self.zoom_in_link = QPushButton("Zoom in", self)
-        self.zoom_out_link = QPushButton("Zoom out", self)
         self.link_button = QCheckBox("Link graphs", self) 
         self.rectangle_plots1 = RectangleGraph()
         self.link_h_box.addWidget(self.link_button)
@@ -63,10 +59,15 @@ class MainWindow(QMainWindow):
             self.rectangle_plots1.rewind_button1.setEnabled(False)
             self.rectangle_plots1.speed_up_button1.setEnabled(False)
             self.rectangle_plots1.speed_down_button1.setEnabled(False)
+            self.pause_link = QPushButton("Pause", self)
+            self.play_link = QPushButton("Play", self)
+            self.zoom_in_link = QPushButton("Zoom in", self)
+            self.zoom_out_link = QPushButton("Zoom out", self)
             self.link_options.addWidget(self.pause_link)
             self.link_options.addWidget(self.play_link)
             self.link_options.addWidget(self.zoom_in_link)
             self.link_options.addWidget(self.zoom_out_link)
+            
 
         else:
             self.rectangle_plots.insert_button1.setEnabled(True)
@@ -83,6 +84,14 @@ class MainWindow(QMainWindow):
             self.rectangle_plots1.rewind_button1.setEnabled(True)
             self.rectangle_plots1.speed_up_button1.setEnabled(True)
             self.rectangle_plots1.speed_down_button1.setEnabled(True)
+            self.remove_option_widgets()
+
+    def remove_option_widgets(self):
+        while self.link_options.count():
+            item = self.link_options.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
 
 
 
