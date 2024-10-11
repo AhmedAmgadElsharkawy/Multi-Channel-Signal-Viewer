@@ -61,22 +61,18 @@ class MainWindow(QMainWindow):
             self.rectangle_plot2.speed_down_button1.setEnabled(False)
             self.pause_link = QPushButton("Pause", self)
             self.play_link = QPushButton("Play", self)
-            self.zoom_in_link = QPushButton("Zoom in", self)
-            self.zoom_out_link = QPushButton("Zoom out", self)
+            self.speed_up_link = QPushButton("Speed up", self)
+            self.speed_down_link = QPushButton("Speed down", self)
             self.link_options.addWidget(self.pause_link)
             self.link_options.addWidget(self.play_link)
-            self.link_options.addWidget(self.zoom_in_link)
-            self.link_options.addWidget(self.zoom_out_link)
+            self.link_options.addWidget(self.speed_up_link)
+            self.link_options.addWidget(self.speed_down_link)
             self.pause_link.clicked.connect(self.pasue_linked_signals)
             self.play_link.clicked.connect(self.play_linked_signals)
-            self.rectangle_plot1.ptr = 0
-            self.rectangle_plot1.timer.stop()
-            self.rectangle_plot1.timer.start(20)
-            self.rectangle_plot1.signalSpeed = 20
-            self.rectangle_plot2.ptr = 0
-            self.rectangle_plot2.timer.stop()
-            self.rectangle_plot2.timer.start(20)
-            self.rectangle_plot2.signalSpeed = 20
+            self.speed_up_link.clicked.connect(self.speed_up_linked_signals)
+            self.speed_down_link.clicked.connect(self.speed_down_linked_signals)
+            self.rectangle_plot1.rewindSignals()
+            self.rectangle_plot2.rewindSignals()
         else:
             self.rectangle_plot1.insert_button1.setEnabled(True)
             self.rectangle_plot1.play_button1.setEnabled(True)
@@ -95,12 +91,21 @@ class MainWindow(QMainWindow):
             self.remove_option_widgets()
 
     def pasue_linked_signals(self):
-        self.rectangle_plot1.timer.stop()
-        self.rectangle_plot2.timer.stop()
+        self.rectangle_plot1.pauseSignals()
+        self.rectangle_plot2.pauseSignals()
     
     def play_linked_signals(self):
-        self.rectangle_plot1.timer.start(20)
-        self.rectangle_plot2.timer.start(20)
+        self.rectangle_plot1.playSignals()
+        self.rectangle_plot2.playSignals()
+
+    def speed_up_linked_signals(self):
+        self.rectangle_plot1.increaseSpeed()
+        self.rectangle_plot2.increaseSpeed()
+
+
+    def speed_down_linked_signals(self):
+        self.rectangle_plot1.decreaseSpeed()
+        self.rectangle_plot2.decreaseSpeed()
 
     def remove_option_widgets(self):
         while self.link_options.count():
