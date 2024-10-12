@@ -47,9 +47,9 @@ class RectangleGraph(QWidget):
 
         # Create layout for controls and align to the top
         rectangle_signal_conntrols_widget = QWidget()
-        rectangle_plot1_controls = QVBoxLayout()
-        rectangle_signal_conntrols_widget.setLayout(rectangle_plot1_controls)
-        rectangle_plot1_controls.setAlignment(Qt.AlignmentFlag.AlignTop)
+        rectangle_plot_controls = QVBoxLayout()
+        rectangle_signal_conntrols_widget.setLayout(rectangle_plot_controls)
+        rectangle_plot_controls.setAlignment(Qt.AlignmentFlag.AlignTop)
         rectangle_signal_conntrols_widget.setFixedSize(100,200)
         self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
 
@@ -118,6 +118,9 @@ class RectangleGraph(QWidget):
         signal_buttons_widget.setFixedWidth(150)
 
         self.disable_props()
+        self.linear_region_item = pg.LinearRegionItem(movable=True)
+        self.linear_region_item.setVisible(False)
+        self.rectangle_plot.addItem(self.linear_region_item)
 
 
         
@@ -247,7 +250,8 @@ class RectangleGraph(QWidget):
     def clearSignals(self):
         self.signals.clear()
         self.curves.clear()
-        self.rectangle_plot.clear() 
+        self.rectangle_plot.clear()
+        self.rectangle_plot.addItem(self.linear_region_item)
         self.rectangle_plot.setXRange(0, 1)  # Initial range
         self.rectangle_plot.setYRange(-1, 1)
         self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
@@ -340,6 +344,8 @@ class RectangleGraph(QWidget):
         self.change_signal_label_button.setEnabled(True)
         self.choose_color_button.setEnabled(True)
         self.show_hide_checkbox.setEnabled(True)
+
+        
 
 
 
