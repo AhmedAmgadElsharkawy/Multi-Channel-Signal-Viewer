@@ -4,7 +4,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon, QPixmap
 from custom_widgets.example import Example
 from custom_widgets.rectangle_graph import RectangleGraph
-from custom_widgets.glue_graph import GlueGraph
+from custom_widgets.glue_and_live_graph import GlueAndLiveGraph
 import numpy as np
 import pyqtgraph as pg
 
@@ -15,15 +15,15 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.isSyncingX = False
         self.setWindowTitle("Multi-Channel-Signal-Viewer")
-        self.resize(800, 600)
         self.initUI()
 
     def initUI(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout()
-        main_layout.setSpacing(1)
-        main_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        main_layout.setSpacing(0)  # Set spacing to zero
+        main_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+
 
         # Here’s an example showing how to use custom widgets; feel free to uncomment it.
         # example = Example()
@@ -48,7 +48,6 @@ class MainWindow(QMainWindow):
         self.link_h_box.addLayout(self.line_container)
         self.line_container.addWidget(self.link_button)
         self.line_container.addWidget(self.link_options_widget)
-        self.link_h_widget.setFixedHeight(50)
         self.line_container.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.link_options_widget.setVisible(False)
         pause_icon = QIcon(); play_icon = QIcon(); add_signal_icon = QIcon(); rewind_button_icon = QIcon(); clear_icon = QIcon(); speed_up_icon = QIcon(); speed_down_icon = QIcon()
@@ -86,7 +85,6 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.rectangle_plot2)
         main_layout.addWidget(self.link_h_widget)
 
-        self.link_button.setFixedHeight(20)  # Set the height of the checkbox
         
 
 
@@ -113,10 +111,17 @@ class MainWindow(QMainWindow):
         self.glue_button.setEnabled(False)
         self.rectangle_plot1.signals_combobox1.currentIndexChanged.connect(self.update_glue_button)
         self.rectangle_plot2.signals_combobox1.currentIndexChanged.connect(self.update_glue_button)
-        self.glue_graph = GlueGraph()
-        main_layout.addWidget(self.glue_graph)
 
-        
+
+        bottom_widget = QWidget()
+        bottom_widget_layout = QHBoxLayout()
+        bottom_widget.setLayout(bottom_widget_layout)
+        main_layout.addWidget(bottom_widget)
+
+        self.glue_and_live_graph = GlueAndLiveGraph()
+        bottom_widget_layout.addWidget(self.glue_and_live_graph)
+
+
 
         # set main layout of central widget
         self.link_button.stateChanged.connect(self.link_button_changed)
@@ -126,6 +131,9 @@ class MainWindow(QMainWindow):
             *{
                            padding:0px;
                            margin:0px;
+            }
+            QPushButton{
+                padding:0px 20px
             }
         """)
     
@@ -219,7 +227,7 @@ class MainWindow(QMainWindow):
         new_x2 = np.array(new_x2)
         new_y2 = np.array(new_y2)
 
-        self.glue_graph.plot_glue(new_x1,new_y1,new_x2,new_y2)
+        self.glue_and_live_graph.plot_glue(new_x1,new_y1,new_x2,new_y2)
 
 
 

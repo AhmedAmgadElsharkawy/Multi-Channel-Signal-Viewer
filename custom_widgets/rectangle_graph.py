@@ -34,16 +34,13 @@ class RectangleGraph(QWidget):
 
 
     def initUI(self):
-        main_layout = QVBoxLayout()
 
-        rectangle_signal_widget = QWidget()
         rectangle_and_controls_container = QHBoxLayout()
-        rectangle_signal_widget.setLayout(rectangle_and_controls_container)
-        rectangle_signal_widget.setFixedHeight(240)
+        self.setFixedHeight(240)
 
         # Create the plot widget
         self.rectangle_plot = pg.PlotWidget(name='Plot1')
-        self.rectangle_plot.resize(600, 230)
+        self.rectangle_plot.resize(600, 240)
 
         # Create layout for controls and align to the top
         rectangle_signal_conntrols_widget = QWidget()
@@ -173,8 +170,7 @@ class RectangleGraph(QWidget):
 
 
         # Add the container to the main layout
-        main_layout.addWidget(rectangle_signal_widget)
-        self.setLayout(main_layout)
+        self.setLayout(rectangle_and_controls_container)
 
         # Connect insert button to file browser
         self.insert_button1.clicked.connect(self.browse_file)
@@ -184,6 +180,8 @@ class RectangleGraph(QWidget):
         self.speed_down_button1.clicked.connect(self.decreaseSpeed)
         self.clear_button1.clicked.connect(self.clearSignals)
         self.rewind_button1.clicked.connect(self.rewindSignals)
+
+        
 
     def add_signal(self, file_path):
         if not file_path:
