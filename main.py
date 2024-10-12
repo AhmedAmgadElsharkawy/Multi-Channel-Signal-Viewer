@@ -29,6 +29,10 @@ class MainWindow(QMainWindow):
         # add your custom widgets below
         self.rectangle_plot1 = RectangleGraph()
         self.rectangle_plot2 = RectangleGraph()
+        self.rectangle_plot1.move_button.setText("Move Down")
+        self.rectangle_plot2.move_button.setText("Move Up")
+        self.rectangle_plot1.move_button.clicked.connect(self.move_down)
+        self.rectangle_plot2.move_button.clicked.connect(self.move_up)
         main_layout.addWidget(self.rectangle_plot1)
         self.link_h_widget = QWidget()
         self.link_h_box = QHBoxLayout()
@@ -289,7 +293,27 @@ class MainWindow(QMainWindow):
             self.rectangle_plot1.rectangle_plot.getViewBox().sigYRangeChanged.connect(self.synchronizePosGraph1)
 
     
+    def move_down(self):
+        index = self.rectangle_plot1.signals_combobox1.currentIndex()
+        signal = self.rectangle_plot1.signals[index]
+        curve = self.rectangle_plot1.curves[index]
+        self.rectangle_plot1.delete_signal()
+        self.rectangle_plot2.signals.append(signal)
+        self.rectangle_plot2.curves.append(curve)
+        self.rectangle_plot2.signals_combobox1.addItem(signal.label)
+        self.rectangle_plot2.rectangle_plot.addItem(curve)
 
+
+
+    def move_up(self):
+        index = self.rectangle_plot2.signals_combobox1.currentIndex()
+        signal = self.rectangle_plot2.signals[index]
+        curve = self.rectangle_plot2.curves[index]
+        self.rectangle_plot2.delete_signal()
+        self.rectangle_plot1.signals.append(signal)
+        self.rectangle_plot1.curves.append(curve)
+        self.rectangle_plot1.signals_combobox1.addItem(signal.label)
+        self.rectangle_plot1.rectangle_plot.addItem(curve)
         
     
 

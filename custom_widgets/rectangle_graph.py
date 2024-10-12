@@ -109,8 +109,11 @@ class RectangleGraph(QWidget):
         signal_buttons_widget.setLayout(signal_buttons_widget_layout)
         # update_signal_props_button = QPushButton("Update")
         self.delete_signal_button = QPushButton("Delete")
+        self.move_button = QPushButton(f"Move")
         # signal_buttons_widget_layout.addWidget(update_signal_props_button)
+        signal_buttons_widget_layout.addWidget(self.move_button)
         signal_buttons_widget_layout.addWidget(self.delete_signal_button)
+
         signal_options_widget_layout.addWidget(signal_buttons_widget)
         # signal_options_widget.setStyleSheet("background-color:red")
         # update_signal_props_button.clicked.connect(self.save_signals_props)
@@ -193,7 +196,7 @@ class RectangleGraph(QWidget):
         self.isRunning = True
         self.timer.stop()
         self.signalSpeed = 20
-        self.signals_combobox1.addItem(signal.label,userData=len(self.signals)-1)
+        self.signals_combobox1.addItem(signal.label)
 
         
         self.ptr = 0
@@ -336,6 +339,7 @@ class RectangleGraph(QWidget):
         self.show_hide_checkbox.setChecked(False)
         self.show_hide_checkbox.blockSignals(False)
         self.show_hide_checkbox.setEnabled(False)
+        self.move_button.setEnabled(False)
         self.line_color.setStyleSheet("border: 2px dotted lightgray;")
 
     def enable_props(self):
@@ -344,6 +348,8 @@ class RectangleGraph(QWidget):
         self.change_signal_label_button.setEnabled(True)
         self.choose_color_button.setEnabled(True)
         self.show_hide_checkbox.setEnabled(True)
+        self.move_button.setEnabled(True)
+
 
     def enable_controls_buttons(self):
         self.insert_button1.setEnabled(True)
@@ -362,6 +368,8 @@ class RectangleGraph(QWidget):
         self.rewind_button1.setEnabled(False)
         self.speed_up_button1.setEnabled(False)
         self.speed_down_button1.setEnabled(False)
+
+    
         
         
 
