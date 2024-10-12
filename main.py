@@ -177,11 +177,14 @@ class MainWindow(QMainWindow):
 
 
     def link_button_changed(self):
-        sender = self.sender()
-        if sender.isChecked():
+        if self.link_button.isChecked():
             if len(self.rectangle_plot1.signals) == 0 or len(self.rectangle_plot2.signals) == 0:
                 QMessageBox.warning(self,"Operation Failed","You can't link the two graphs if one of them is empty")
-                sender.setChecked(False)
+                self.link_button.stateChanged.disconnect(self.link_button_changed)
+                self.link_button.setChecked(False)
+                print(self.link_button.isChecked())
+                self.link_button.stateChanged.connect(self.link_button_changed)
+
                 return
             self.rectangle_plot1.insert_button1.setEnabled(False)
             self.rectangle_plot1.play_button1.setEnabled(False)
