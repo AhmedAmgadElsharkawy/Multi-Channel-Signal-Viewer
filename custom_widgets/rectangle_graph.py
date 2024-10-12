@@ -39,11 +39,11 @@ class RectangleGraph(QWidget):
         rectangle_signal_widget = QWidget()
         rectangle_and_controls_container = QHBoxLayout()
         rectangle_signal_widget.setLayout(rectangle_and_controls_container)
-        rectangle_signal_widget.setFixedHeight(250)
+        rectangle_signal_widget.setFixedHeight(240)
 
         # Create the plot widget
         self.rectangle_plot = pg.PlotWidget(name='Plot1')
-        self.rectangle_plot.resize(600, 240)
+        self.rectangle_plot.resize(600, 230)
 
         # Create layout for controls and align to the top
         rectangle_signal_conntrols_widget = QWidget()
@@ -345,6 +345,24 @@ class RectangleGraph(QWidget):
         self.choose_color_button.setEnabled(True)
         self.show_hide_checkbox.setEnabled(True)
 
+    def enable_controls_buttons(self):
+        self.insert_button1.setEnabled(True)
+        self.play_button1.setEnabled(True)
+        self.pause_button1.setEnabled(True) 
+        self.clear_button1.setEnabled(True) 
+        self.rewind_button1.setEnabled(True)
+        self.speed_up_button1.setEnabled(True)
+        self.speed_down_button1.setEnabled(True)
+    
+    def disable_controls_buttons(self):
+        self.insert_button1.setEnabled(False)
+        self.play_button1.setEnabled(False)
+        self.pause_button1.setEnabled(False) 
+        self.clear_button1.setEnabled(False) 
+        self.rewind_button1.setEnabled(False)
+        self.speed_up_button1.setEnabled(False)
+        self.speed_down_button1.setEnabled(False)
+        
         
 
 

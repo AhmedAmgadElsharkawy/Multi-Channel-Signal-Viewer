@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QHBoxLayout,QGridLayout,QWidget,QLabel, QPushButton, QCheckBox, QMessageBox,QComboBox
+from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QHBoxLayout,QGridLayout,QWidget,QLabel, QPushButton, QCheckBox, QMessageBox,QComboBox,QSizePolicy
 from PyQt6.QtCore import Qt
 from custom_widgets.example import Example
 from custom_widgets.rectangle_graph import RectangleGraph
@@ -19,6 +19,7 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout()
+        main_layout.setSpacing(1)
         main_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         # Here’s an example showing how to use custom widgets; feel free to uncomment it.
@@ -33,17 +34,41 @@ class MainWindow(QMainWindow):
         self.link_h_box = QHBoxLayout()
         self.link_h_widget.setLayout(self.link_h_box)
         self.line_container = QHBoxLayout()
+        self.link_options_widget = QWidget()
         self.link_options = QHBoxLayout()
+        self.link_options_widget.setLayout(self.link_options)
         self.link_button = QCheckBox("Link graphs", self) 
         self.link_h_box.addLayout(self.line_container)
         self.line_container.addWidget(self.link_button)
-        self.line_container.addLayout(self.link_options)
-        self.link_h_box.addStretch()
-        self.link_h_widget.setStyleSheet("background-color:red")
+        self.line_container.addWidget(self.link_options_widget)
+        self.link_h_widget.setFixedHeight(50)
         self.line_container.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.link_options_widget.setVisible(False)
+
+        self.pause_link = QPushButton("Pause", self)
+        self.play_link = QPushButton("Play", self)
+        self.speed_up_link = QPushButton("Speed up", self)
+        self.speed_down_link = QPushButton("Speed down", self)
+        self.rewind_link = QPushButton("Rewind", self)
+        self.link_options.addWidget(self.pause_link)
+        self.link_options.addWidget(self.play_link)
+        self.link_options.addWidget(self.rewind_link)
+        self.link_options.addWidget(self.speed_up_link)
+        self.link_options.addWidget(self.speed_down_link)
+        self.pause_link.clicked.connect(self.pasue_linked_signals)
+        self.play_link.clicked.connect(self.play_linked_signals)
+        self.speed_up_link.clicked.connect(self.speed_up_linked_signals)
+        self.speed_down_link.clicked.connect(self.speed_down_linked_signals)
+        self.rewind_link.clicked.connect(self.rewind_linked_signals)
+        self.link_button.setEnabled(False)
+
         
-        main_layout.addWidget(self.link_h_widget)
         main_layout.addWidget(self.rectangle_plot2)
+        main_layout.addWidget(self.link_h_widget)
+
+        self.link_button.setFixedHeight(20)  # Set the height of the checkbox
+        
+
 
         
 
@@ -51,6 +76,7 @@ class MainWindow(QMainWindow):
         glue_widget = QWidget()
         glue_widget_layout = QHBoxLayout()
         glue_widget.setLayout(glue_widget_layout)
+        glue_widget_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.link_h_box.addWidget(glue_widget)
         self.glue_button = QPushButton("Glue")
         glue_widget_layout.addWidget(self.glue_button)
@@ -61,7 +87,6 @@ class MainWindow(QMainWindow):
         glue_widget_layout.addWidget(self.cancel_glue_button)
         self.cancel_glue_button.hide()
         self.confirm_glue_button.hide()
-        glue_widget_layout.addStretch()
         self.cancel_glue_button.clicked.connect(self.cancel_signals_glue)
         self.glue_button.clicked.connect(self.start_signals_glue)
         self.confirm_glue_button.clicked.connect(self.confirm_signals_glue)
@@ -70,11 +95,19 @@ class MainWindow(QMainWindow):
         self.rectangle_plot2.signals_combobox1.currentIndexChanged.connect(self.update_glue_button)
         self.glue_graph = GlueGraph()
         main_layout.addWidget(self.glue_graph)
+
         
 
         # set main layout of central widget
         self.link_button.stateChanged.connect(self.link_button_changed)
         central_widget.setLayout(main_layout)
+
+        self.setStyleSheet("""
+            *{
+                           padding:0px;
+                           margin:0px;
+            }
+        """)
     
     def start_signals_glue(self):
         self.rectangle_plot1.pauseSignals()
@@ -168,8 +201,11 @@ class MainWindow(QMainWindow):
     def update_glue_button(self):
         if self.rectangle_plot1.signals_combobox1.currentIndex() >=0 and self.rectangle_plot2.signals_combobox1.currentIndex() >=0:
             self.glue_button.setEnabled(True)
+            self.link_button.setEnabled(True)
         else:
             self.glue_button.setEnabled(False)
+            self.link_button.setEnabled(False)
+            self.link_button.setCheckState(Qt.CheckState.Unchecked)
     
 
         
@@ -179,61 +215,23 @@ class MainWindow(QMainWindow):
     def link_button_changed(self):
         sender = self.sender()
         if sender.isChecked():
-            if len(self.rectangle_plot1.signals) == 0 or len(self.rectangle_plot2.signals) == 0:
-                QMessageBox.warning(self,"Operation Failed","You can't link the two graphs if one of them is empty")
-                sender.setChecked(False)
-                return
-            self.rectangle_plot1.insert_button1.setEnabled(False)
-            self.rectangle_plot1.play_button1.setEnabled(False)
-            self.rectangle_plot1.pause_button1.setEnabled(False) 
-            self.rectangle_plot1.clear_button1.setEnabled(False) 
-            self.rectangle_plot1.rewind_button1.setEnabled(False)
-            self.rectangle_plot1.speed_up_button1.setEnabled(False)
-            self.rectangle_plot1.speed_down_button1.setEnabled(False)
-            self.rectangle_plot2.insert_button1.setEnabled(False)
-            self.rectangle_plot2.play_button1.setEnabled(False)
-            self.rectangle_plot2.pause_button1.setEnabled(False) 
-            self.rectangle_plot2.clear_button1.setEnabled(False) 
-            self.rectangle_plot2.rewind_button1.setEnabled(False)
-            self.rectangle_plot2.speed_up_button1.setEnabled(False)
-            self.rectangle_plot2.speed_down_button1.setEnabled(False)
-            self.pause_link = QPushButton("Pause", self)
-            self.play_link = QPushButton("Play", self)
-            self.speed_up_link = QPushButton("Speed up", self)
-            self.speed_down_link = QPushButton("Speed down", self)
-            self.rewind_link = QPushButton("Rewind", self)
-            self.link_options.addWidget(self.pause_link)
-            self.link_options.addWidget(self.play_link)
-            self.link_options.addWidget(self.rewind_link)
-            self.link_options.addWidget(self.speed_up_link)
-            self.link_options.addWidget(self.speed_down_link)
-            self.pause_link.clicked.connect(self.pasue_linked_signals)
-            self.play_link.clicked.connect(self.play_linked_signals)
-            self.speed_up_link.clicked.connect(self.speed_up_linked_signals)
-            self.speed_down_link.clicked.connect(self.speed_down_linked_signals)
-            self.rewind_link.clicked.connect(self.rewind_linked_signals)
             self.rectangle_plot1.rewindSignals()
             self.rectangle_plot2.rewindSignals()
             self.rectangle_plot1.rectangle_plot.getViewBox().sigXRangeChanged.connect(self.synchronizePosGraph1)
             self.rectangle_plot2.rectangle_plot.getViewBox().sigXRangeChanged.connect(self.synchronizePosGraph2)
             self.rectangle_plot1.rectangle_plot.getViewBox().sigYRangeChanged.connect(self.synchronizePosGraph1)
             self.rectangle_plot2.rectangle_plot.getViewBox().sigYRangeChanged.connect(self.synchronizePosGraph2)
+            self.link_options_widget.setVisible(True)
+            self.rectangle_plot1.disable_controls_buttons()
+            self.rectangle_plot2.disable_controls_buttons()
         else:
-            self.rectangle_plot1.insert_button1.setEnabled(True)
-            self.rectangle_plot1.play_button1.setEnabled(True)
-            self.rectangle_plot1.pause_button1.setEnabled(True) 
-            self.rectangle_plot1.clear_button1.setEnabled(True) 
-            self.rectangle_plot1.rewind_button1.setEnabled(True)
-            self.rectangle_plot1.speed_up_button1.setEnabled(True)
-            self.rectangle_plot1.speed_down_button1.setEnabled(True)
-            self.rectangle_plot2.insert_button1.setEnabled(True)
-            self.rectangle_plot2.play_button1.setEnabled(True)
-            self.rectangle_plot2.pause_button1.setEnabled(True) 
-            self.rectangle_plot2.clear_button1.setEnabled(True) 
-            self.rectangle_plot2.rewind_button1.setEnabled(True)
-            self.rectangle_plot2.speed_up_button1.setEnabled(True)
-            self.rectangle_plot2.speed_down_button1.setEnabled(True)
-            self.remove_option_widgets()
+            self.rectangle_plot1.enable_controls_buttons()
+            self.rectangle_plot2.enable_controls_buttons()
+            self.link_options_widget.setVisible(False)
+            self.rectangle_plot1.rectangle_plot.getViewBox().sigXRangeChanged.disconnect(self.synchronizePosGraph1)
+            self.rectangle_plot2.rectangle_plot.getViewBox().sigXRangeChanged.disconnect(self.synchronizePosGraph2)
+            self.rectangle_plot1.rectangle_plot.getViewBox().sigYRangeChanged.disconnect(self.synchronizePosGraph1)
+            self.rectangle_plot2.rectangle_plot.getViewBox().sigYRangeChanged.disconnect(self.synchronizePosGraph2)
 
     def pasue_linked_signals(self):
         self.rectangle_plot1.pauseSignals()
@@ -255,13 +253,6 @@ class MainWindow(QMainWindow):
     def rewind_linked_signals(self):
         self.rectangle_plot1.rewindSignals()
         self.rectangle_plot2.rewindSignals()
-
-    def remove_option_widgets(self):
-        while self.link_options.count():
-            item = self.link_options.takeAt(0)
-            widget = item.widget()
-            if widget:
-                widget.deleteLater()
 
     def synchronizePosGraph1(self):
         if not self.isSyncingX and not self.rectangle_plot1.isRunning:
@@ -296,6 +287,11 @@ class MainWindow(QMainWindow):
             # Reconnect the signal
             self.rectangle_plot1.rectangle_plot.getViewBox().sigXRangeChanged.connect(self.synchronizePosGraph1)
             self.rectangle_plot1.rectangle_plot.getViewBox().sigYRangeChanged.connect(self.synchronizePosGraph1)
+
+    
+
+        
+    
 
 def main():
     app = QApplication(sys.argv)
