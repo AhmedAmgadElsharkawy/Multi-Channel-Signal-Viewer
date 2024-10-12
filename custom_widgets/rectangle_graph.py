@@ -236,7 +236,6 @@ class RectangleGraph(QWidget):
 
     def playSignals(self):
         self.isRunning = True
-        print("played")
 
     def increaseSpeed(self):
         self.timer.stop()

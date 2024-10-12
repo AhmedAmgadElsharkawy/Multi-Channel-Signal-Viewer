@@ -6,6 +6,8 @@ from custom_widgets.example import Example
 from custom_widgets.rectangle_graph import RectangleGraph
 from custom_widgets.glue_graph import GlueGraph
 import numpy as np
+import pyqtgraph as pg
+
 
 
 class MainWindow(QMainWindow):
@@ -141,8 +143,6 @@ class MainWindow(QMainWindow):
         self.rectangle_plot1.linear_region_item.setRegion([rectangle_plot1_xRange[0],linear_region_item1_end])
         self.rectangle_plot2.linear_region_item.setRegion([rectangle_plot2_xRange[0],linear_region_item2_end])
         self.glue_button.hide()
-        # self.choose_glue_signal1.show()
-        # self.choose_glue_signal2.show()
         self.confirm_glue_button.show()
         self.cancel_glue_button.show()
         signal1_index = self.rectangle_plot1.signals_combobox1.currentIndex()
@@ -156,6 +156,10 @@ class MainWindow(QMainWindow):
             if i == signal2_index:
                 continue
             self.rectangle_plot2.rectangle_plot.removeItem(curve)
+        self.rectangle_plot1.disable_controls_buttons()
+        self.rectangle_plot1.disable_props()
+        self.rectangle_plot2.disable_controls_buttons()
+        self.rectangle_plot2.disable_props()
 
 
     def cancel_signals_glue(self):
@@ -181,6 +185,11 @@ class MainWindow(QMainWindow):
             if i == signal2_index:
                 continue
             self.rectangle_plot2.rectangle_plot.addItem(curve)
+        
+        self.rectangle_plot1.enable_controls_buttons()
+        self.rectangle_plot1.enable_props()
+        self.rectangle_plot2.enable_controls_buttons()
+        self.rectangle_plot2.enable_props()
 
     def confirm_signals_glue(self):
         signal_region1 = self.rectangle_plot1.linear_region_item.getRegion()
@@ -310,24 +319,28 @@ class MainWindow(QMainWindow):
     def move_down(self):
         index = self.rectangle_plot1.signals_combobox1.currentIndex()
         signal = self.rectangle_plot1.signals[index]
-        curve = self.rectangle_plot1.curves[index]
         self.rectangle_plot1.delete_signal()
         self.rectangle_plot2.signals.append(signal)
+        curve = self.rectangle_plot2.rectangle_plot.plot(pen=pg.mkPen(color=signal.color))
         self.rectangle_plot2.curves.append(curve)
         self.rectangle_plot2.signals_combobox1.addItem(signal.label)
-        self.rectangle_plot2.rectangle_plot.addItem(curve)
+        self.rectangle_plot2.xLimit = max(self.rectangle_plot2.xLimit,len(signal.x))
+        self.rectangle_plot2.rewindSignals()
+        
 
 
 
     def move_up(self):
         index = self.rectangle_plot2.signals_combobox1.currentIndex()
         signal = self.rectangle_plot2.signals[index]
-        curve = self.rectangle_plot2.curves[index]
         self.rectangle_plot2.delete_signal()
         self.rectangle_plot1.signals.append(signal)
+        curve = self.rectangle_plot1.rectangle_plot.plot(pen=pg.mkPen(color=signal.color))
         self.rectangle_plot1.curves.append(curve)
         self.rectangle_plot1.signals_combobox1.addItem(signal.label)
-        self.rectangle_plot1.rectangle_plot.addItem(curve)
+        self.rectangle_plot1.xLimit = max(self.rectangle_plot2.xLimit,len(signal.x))
+        self.rectangle_plot1.rewindSignals()
+
         
     
 
