@@ -240,14 +240,12 @@ class RectangleGraph(QWidget):
         if (self.signalSpeed > 5):
             self.signalSpeed = int(self.signalSpeed / 2)
         self.timer.start(self.signalSpeed)
-        print(self.signalSpeed)
 
     def decreaseSpeed(self):
         self.timer.stop()
         if (self.signalSpeed < 40):
             self.signalSpeed = int(self.signalSpeed * 2)
         self.timer.start(self.signalSpeed)
-        print(self.signalSpeed)
 
     def clearSignals(self):
         self.signals.clear()
