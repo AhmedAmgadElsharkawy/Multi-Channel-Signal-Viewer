@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog,QScrollArea,QComboBox,QLabel,QLineEdit,QColorDialog,QCheckBox
-from PyQt6.QtGui import QPainter, QPen ,QColor
+from PyQt6.QtGui import QPainter, QPen ,QColor, QIcon, QPixmap
 import pyqtgraph as pg
 from PyQt6.QtCore import Qt,QTimer
 import pandas as pd
@@ -127,15 +127,30 @@ class RectangleGraph(QWidget):
 
 
         # Create buttons
-        self.insert_button1 = QPushButton("Insert")
-        self.play_button1 = QPushButton("Play")
-        self.pause_button1 = QPushButton("Pause")
-        self.clear_button1 = QPushButton("Clear")
-        self.rewind_button1 = QPushButton("Rewind")
-        self.speed_up_button1 = QPushButton("Speed Up")
-        self.speed_down_button1 = QPushButton("Speed Down")
+        self.insert_button1 = QPushButton()
+        self.play_button1 = QPushButton()
+        self.pause_button1 = QPushButton()
+        self.clear_button1 = QPushButton()
+        self.rewind_button1 = QPushButton()
+        self.speed_up_button1 = QPushButton("")
+        self.speed_down_button1 = QPushButton("")
 
         # Add buttons to the layout
+        pause_icon = QIcon(); play_icon = QIcon(); add_signal_icon = QIcon(); rewind_button_icon = QIcon(); clear_icon = QIcon(); speed_up_icon = QIcon(); speed_down_icon = QIcon()
+        add_signal_icon.addPixmap(QPixmap("Images/plus.png"))
+        pause_icon.addPixmap(QPixmap("Images/pause.png"))
+        play_icon.addPixmap(QPixmap("Images/play.png"))
+        rewind_button_icon.addPixmap(QPixmap("Images/rewind.png"))
+        clear_icon.addPixmap(QPixmap("Images/clean.png"))
+        speed_up_icon.addPixmap(QPixmap("Images/forward-button.png"))
+        speed_down_icon.addPixmap(QPixmap("Images/rewind-button.png"))
+        self.insert_button1.setIcon(add_signal_icon)
+        self.play_button1.setIcon(play_icon)
+        self.pause_button1.setIcon(pause_icon)
+        self.rewind_button1.setIcon(rewind_button_icon)
+        self.clear_button1.setIcon(clear_icon)
+        self.speed_up_button1.setIcon(speed_up_icon)
+        self.speed_down_button1.setIcon(speed_down_icon)
         rectangle_plot1_controls.addWidget(self.insert_button1)
         rectangle_plot1_controls.addWidget(self.play_button1)
         rectangle_plot1_controls.addWidget(self.pause_button1)
