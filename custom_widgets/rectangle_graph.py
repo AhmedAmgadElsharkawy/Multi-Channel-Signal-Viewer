@@ -154,13 +154,13 @@ class RectangleGraph(QWidget):
         self.clear_button1.setIcon(clear_icon)
         self.speed_up_button1.setIcon(speed_up_icon)
         self.speed_down_button1.setIcon(speed_down_icon)
-        rectangle_plot1_controls.addWidget(self.insert_button1)
-        rectangle_plot1_controls.addWidget(self.play_button1)
-        rectangle_plot1_controls.addWidget(self.pause_button1)
-        rectangle_plot1_controls.addWidget(self.rewind_button1)
-        rectangle_plot1_controls.addWidget(self.clear_button1)
-        rectangle_plot1_controls.addWidget(self.speed_up_button1)
-        rectangle_plot1_controls.addWidget(self.speed_down_button1)
+        rectangle_plot_controls.addWidget(self.insert_button1)
+        rectangle_plot_controls.addWidget(self.play_button1)
+        rectangle_plot_controls.addWidget(self.pause_button1)
+        rectangle_plot_controls.addWidget(self.rewind_button1)
+        rectangle_plot_controls.addWidget(self.clear_button1)
+        rectangle_plot_controls.addWidget(self.speed_up_button1)
+        rectangle_plot_controls.addWidget(self.speed_down_button1)
 
 
         # Add plot and controls to the container
