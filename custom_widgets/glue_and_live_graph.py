@@ -14,6 +14,7 @@ class GlueAndLiveGraph(QWidget):
         self.glue_plot = pg.PlotWidget()
         main_layout.addWidget(self.glue_plot)
         self.setFixedHeight(240)
+        self.setFixedWidth(1250)
 
         self.controls_widget = QWidget()
         self.controls_widget_layout = QVBoxLayout()

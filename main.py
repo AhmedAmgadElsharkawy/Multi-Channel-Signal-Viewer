@@ -1,12 +1,14 @@
 import sys
 from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QHBoxLayout,QGridLayout,QWidget,QLabel, QPushButton, QCheckBox, QMessageBox,QComboBox,QSizePolicy
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 from custom_widgets.example import Example
 from custom_widgets.rectangle_graph import RectangleGraph
 from custom_widgets.glue_and_live_graph import GlueAndLiveGraph
 import numpy as np
 import pyqtgraph as pg
+import math
+import random
 
 
 
@@ -117,9 +119,13 @@ class MainWindow(QMainWindow):
         bottom_widget_layout = QHBoxLayout()
         bottom_widget.setLayout(bottom_widget_layout)
         main_layout.addWidget(bottom_widget)
+        radar = RadarWidget()
+        radar_box = QVBoxLayout()
+        radar_box.addWidget(radar)
 
         self.glue_and_live_graph = GlueAndLiveGraph()
         bottom_widget_layout.addWidget(self.glue_and_live_graph)
+        bottom_widget_layout.addLayout(radar_box)
 
 
 
@@ -349,6 +355,60 @@ class MainWindow(QMainWindow):
         self.rectangle_plot1.xLimit = max(self.rectangle_plot2.xLimit,len(signal.x))
         self.rectangle_plot1.rewindSignals()
 
+class RadarWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('Radar Simulation')
+        self.setGeometry(0, 0, 200, 200)
+
+        self.angle = 0
+        self.pointer_length = 100
+        self.points = []
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.updateRadar)
+        self.timer.start(50)  # Update every 50 milliseconds
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Draw radar background
+        painter.setBrush(QColor("#000000"))
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.drawEllipse(21, 10, 200, 200)
+
+        # Calculate pointer endpoint
+        pointer_x = int(self.width() // 2 + self.pointer_length * math.cos(math.radians(self.angle)))
+        pointer_y = int(self.height() // 2 + self.pointer_length * math.sin(math.radians(self.angle)))
+
+        # Draw radar pointer
+        painter.setPen(QColor("#FF0000"))
+        painter.drawLine(self.width() // 2 , self.height() // 2, pointer_x, pointer_y)
+
+        # Draw points along the radar line
+        for point in self.points:
+            painter.setBrush(QColor("#00FF00"))
+            painter.drawEllipse(int(point[0] - 3), int(point[1] - 3), 6, 6)
+
+    def updateRadar(self):
+        # Update angle and generate new point
+        self.angle += 5
+        self.angle %= 360
+
+        # Calculate new point position along the radar line
+        random_distance = random.uniform(0, self.pointer_length)      
+        point_x = int(self.width() // 2 + random_distance * math.cos(math.radians(self.angle)))
+        point_y = int(self.height() // 2 + random_distance * math.sin(math.radians(self.angle)))
+
+        # Add new point to the list
+        self.points.append((point_x, point_y))
+
+        # Limit the number of points to avoid clutter
+        if len(self.points) > 20:
+            self.points.pop(0)  # Remove the oldest point
+
+        self.update()
         
     
 
