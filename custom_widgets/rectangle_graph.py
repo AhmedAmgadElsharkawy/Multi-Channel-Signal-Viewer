@@ -204,7 +204,7 @@ class RectangleGraph(QWidget):
         self.rectangle_plot.setYRange(-1, 1)
 
         # Set up the QTimer
-        self.timer.start(20)  # 50 milliseconds
+        self.timer.start(self.signalSpeed)  # 20 milliseconds
         
 
     def update_plot(self):
@@ -217,7 +217,6 @@ class RectangleGraph(QWidget):
                             self.rectangle_plot.setLimits(xMin=0, xMax=((self.ptr / 1000)), yMin=-2, yMax=2)
             self.ptr += 1
             self.rectangle_plot.setXRange((self.ptr / 1000), (self.ptr / 1000))
-        else: self.timer.stop()
 
     def browse_file(self):
         file_dialog = QFileDialog(self)
@@ -234,6 +233,7 @@ class RectangleGraph(QWidget):
 
     def playSignals(self):
         self.isRunning = True
+        print("played")
 
     def increaseSpeed(self):
         self.timer.stop()
