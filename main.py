@@ -1,6 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QHBoxLayout,QGridLayout,QWidget,QLabel, QPushButton, QCheckBox, QMessageBox,QComboBox,QSizePolicy
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon, QPixmap
 from custom_widgets.example import Example
 from custom_widgets.rectangle_graph import RectangleGraph
 from custom_widgets.glue_graph import GlueGraph
@@ -44,12 +45,25 @@ class MainWindow(QMainWindow):
         self.link_h_widget.setFixedHeight(50)
         self.line_container.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.link_options_widget.setVisible(False)
+        pause_icon = QIcon(); play_icon = QIcon(); add_signal_icon = QIcon(); rewind_button_icon = QIcon(); clear_icon = QIcon(); speed_up_icon = QIcon(); speed_down_icon = QIcon()
+        add_signal_icon.addPixmap(QPixmap("Images/plus.png"))
+        pause_icon.addPixmap(QPixmap("Images/pause.png"))
+        play_icon.addPixmap(QPixmap("Images/play.png"))
+        rewind_button_icon.addPixmap(QPixmap("Images/rewind.png"))
+        clear_icon.addPixmap(QPixmap("Images/clean.png"))
+        speed_up_icon.addPixmap(QPixmap("Images/forward-button.png"))
+        speed_down_icon.addPixmap(QPixmap("Images/rewind-button.png"))
+        self.pause_link = QPushButton(self)
+        self.play_link = QPushButton(self)
+        self.speed_up_link = QPushButton(self)
+        self.speed_down_link = QPushButton(self)
+        self.rewind_link = QPushButton(self)
+        self.pause_link.setIcon(pause_icon)
+        self.play_link.setIcon(play_icon)
+        self.speed_up_link.setIcon(speed_up_icon)
+        self.speed_down_link.setIcon(speed_down_icon)
+        self.rewind_link.setIcon(rewind_button_icon)
 
-        self.pause_link = QPushButton("Pause", self)
-        self.play_link = QPushButton("Play", self)
-        self.speed_up_link = QPushButton("Speed up", self)
-        self.speed_down_link = QPushButton("Speed down", self)
-        self.rewind_link = QPushButton("Rewind", self)
         self.link_options.addWidget(self.pause_link)
         self.link_options.addWidget(self.play_link)
         self.link_options.addWidget(self.rewind_link)

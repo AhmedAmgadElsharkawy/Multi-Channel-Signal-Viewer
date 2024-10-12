@@ -13,11 +13,11 @@ class RectangleGraph(QWidget):
         # self.setStyleSheet("background-color:red")
         self.signals = []
         self.xLimit = 0
-        self.isRunning = True
+        self.isRunning = False
         self.signalSpeed = 20
-        self.timer = QTimer(self)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_plot)
         self.curves = []
-        self.timer = QTimer(self)
         self.selected_signal = None
         self.colors = [
             '#ff0000',  # Red
@@ -185,14 +185,14 @@ class RectangleGraph(QWidget):
     def add_signal(self, file_path):
         if not file_path:
             pass
-        signal  = Signal(file_path,len(self.signals))
+        signal = Signal(file_path,len(self.signals))
         if len(signal.x) > self.xLimit:
             self.xLimit = len(signal.x)
         signal.color = self.colors[len(self.signals)%len(self.colors)]
         self.signals.append(signal)
-        self.isRunning = True
         self.timer.stop()
         self.signalSpeed = 20
+        self.isRunning = True
         self.signals_combobox1.addItem(signal.label,userData=len(self.signals)-1)
 
         
@@ -204,8 +204,7 @@ class RectangleGraph(QWidget):
         self.rectangle_plot.setYRange(-1, 1)
 
         # Set up the QTimer
-        self.timer.timeout.connect(self.update_plot)
-        self.timer.start(self.signalSpeed)  # 50 milliseconds
+        self.timer.start(20)  # 50 milliseconds
         
 
     def update_plot(self):
@@ -218,6 +217,7 @@ class RectangleGraph(QWidget):
                             self.rectangle_plot.setLimits(xMin=0, xMax=((self.ptr / 1000)), yMin=-2, yMax=2)
             self.ptr += 1
             self.rectangle_plot.setXRange((self.ptr / 1000), (self.ptr / 1000))
+        else: self.timer.stop()
 
     def browse_file(self):
         file_dialog = QFileDialog(self)
@@ -259,12 +259,14 @@ class RectangleGraph(QWidget):
         self.timer.stop()
 
     def rewindSignals(self):
+        self.timer.stop()
         self.ptr = 0
         self.signalSpeed = 20
         self.rectangle_plot.setXRange(0, 1)  # Initial range
         self.rectangle_plot.setYRange(-1, 1)
         self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
         self.isRunning = True
+        self.timer.start(20)
     def on_signal_selected(self):
         signal_index = self.signals_combobox1.currentIndex()
         if(signal_index < 0): 
