@@ -199,8 +199,7 @@ class RectangleGraph(QWidget):
                         if self.ptr / 1000 > 1:
                             self.rectangle_plot.setLimits(xMin=0, xMax=((self.ptr / 1000)), yMin=-2, yMax=2)
             self.ptr += 1
-            if self.ptr > 1000:
-                self.rectangle_plot.setXRange((self.ptr / 1000) - 1, self.ptr / 1000)
+            self.rectangle_plot.setXRange((self.ptr / 1000), (self.ptr / 1000))
 
     def browse_file(self):
         file_dialog = QFileDialog(self)
