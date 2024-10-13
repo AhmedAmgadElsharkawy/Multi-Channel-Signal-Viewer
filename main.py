@@ -392,7 +392,7 @@ class RadarWidget(QWidget):
         # Draw radar background
         painter.setBrush(QColor("#000000"))
         painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawEllipse(21, 10, 200, 200)
+        painter.drawEllipse(13, 10, 200, 200)
 
         # Calculate pointer endpoint
         pointer_x = int(self.width() // 2 + self.pointer_length * math.cos(math.radians(self.angle)))
