@@ -87,11 +87,6 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.rectangle_plot2)
         main_layout.addWidget(self.link_h_widget)
 
-        
-
-
-        
-
 
         glue_widget = QWidget()
         glue_widget_layout = QHBoxLayout()
@@ -127,6 +122,10 @@ class MainWindow(QMainWindow):
         self.radar_pause_button.setMaximumWidth(60)
         self.radar_speed_up_button.setMaximumWidth(60)
         self.radar_speed_down_button.setMaximumWidth(60)
+        self.radar_play_button.clicked.connect(self.radar.playRadar)
+        self.radar_pause_button.clicked.connect(self.radar.pauseRadar)
+        self.radar_speed_up_button.clicked.connect(self.radar.increaseSpeed)
+        self.radar_speed_down_button.clicked.connect(self.radar.decreaseSpeed)
         self.radar_play_button.setIcon(play_icon)
         self.radar_pause_button.setIcon(pause_icon)
         self.radar_speed_up_button.setIcon(speed_up_icon)
@@ -378,12 +377,13 @@ class RadarWidget(QWidget):
         self.setWindowTitle('Radar Simulation')
         self.setGeometry(0, 0, 200, 200)
 
+        self.signalSpeed = 50
         self.angle = 0
         self.pointer_length = 100
         self.points = []
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.updateRadar)
-        self.timer.start(50)  # Update every 50 milliseconds
+        self.timer.start(self.signalSpeed)  # Update every 50 milliseconds
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -426,6 +426,23 @@ class RadarWidget(QWidget):
 
         self.update()
         
+    def pauseRadar(self):
+        self.timer.stop()
+
+    def playRadar(self):
+        self.timer.start(self.signalSpeed)
+
+    def increaseSpeed(self):
+        self.timer.stop()
+        if self.signalSpeed > 10:
+            self.signalSpeed = int(self.signalSpeed / 5)
+        self.timer.start(self.signalSpeed)
+
+    def decreaseSpeed(self):
+        self.timer.stop()
+        if self.signalSpeed < 250:
+            self.signalSpeed *= 5
+        self.timer.start(self.signalSpeed)
     
 
 def main():
