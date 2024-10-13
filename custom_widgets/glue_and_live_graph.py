@@ -86,6 +86,10 @@ class GlueAndLiveGraph(QWidget):
 
         self.curve = self.glue_and_live_plot.plot(pen=pg.mkPen("#ff0000", width=5))
 
+        self.play_button.clicked.connect(self.play_live_signal)
+        self.pause_button.clicked.connect(self.pause_live_signal)
+
+
         
         
         self.setLayout(main_layout)
@@ -123,8 +127,6 @@ class GlueAndLiveGraph(QWidget):
     def pause_live_signal(self):
         self.is_paused = True
     
-    def rewind_signal(self):
-        self.is_rewind = True
 
 
         
