@@ -119,13 +119,29 @@ class MainWindow(QMainWindow):
         bottom_widget_layout = QHBoxLayout()
         bottom_widget.setLayout(bottom_widget_layout)
         main_layout.addWidget(bottom_widget)
-        radar = RadarWidget()
-        radar_box = QVBoxLayout()
-        radar_box.addWidget(radar)
+        self.radar = RadarWidget()
+        self.radar_box = QHBoxLayout()
+        self.radar_buttons = QVBoxLayout()
+        self.radar_play_button = QPushButton(); self.radar_pause_button = QPushButton(); self.radar_speed_up_button = QPushButton(self); self.radar_speed_down_button = QPushButton(self)
+        self.radar_play_button.setMaximumWidth(60)
+        self.radar_pause_button.setMaximumWidth(60)
+        self.radar_speed_up_button.setMaximumWidth(60)
+        self.radar_speed_down_button.setMaximumWidth(60)
+        self.radar_play_button.setIcon(play_icon)
+        self.radar_pause_button.setIcon(pause_icon)
+        self.radar_speed_up_button.setIcon(speed_up_icon)
+        self.radar_speed_down_button.setIcon(speed_down_icon)
+        self.radar_buttons.addWidget(self.radar_play_button)
+        self.radar_buttons.addWidget(self.radar_pause_button)
+        self.radar_buttons.addWidget(self.radar_speed_up_button)
+        self.radar_buttons.addWidget(self.radar_speed_down_button)
+
+        self.radar_box.addWidget(self.radar)
+        self.radar_box.addLayout(self.radar_buttons)
 
         self.glue_and_live_graph = GlueAndLiveGraph()
         bottom_widget_layout.addWidget(self.glue_and_live_graph)
-        bottom_widget_layout.addLayout(radar_box)
+        bottom_widget_layout.addLayout(self.radar_box)
 
 
 
