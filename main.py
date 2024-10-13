@@ -154,7 +154,7 @@ class MainWindow(QMainWindow):
                            margin:0px;
             }
             QPushButton{
-                padding:0px 20px
+                padding:5px 20px
             }
         """)
     

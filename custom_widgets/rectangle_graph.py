@@ -181,6 +181,14 @@ class RectangleGraph(QWidget):
         self.clear_button1.clicked.connect(self.clearSignals)
         self.rewind_button1.clicked.connect(self.rewindSignals)
 
+        self.setStyleSheet("""
+            QPushButton{
+                           padding:3px 5px
+            }
+        """)
+
+
+
         
 
     def add_signal(self, file_path):
