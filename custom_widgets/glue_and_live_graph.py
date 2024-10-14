@@ -28,17 +28,18 @@ class GlueAndLiveGraph(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.is_paused = False
-        self.is_rewind = False
-        self.signal_color = 'g'  # the Default color i used (there are other 4 colors)
-        self.signal_label = "Live Signal"
-        self.show_signal = True
-        self.timer = QTimer(self) ######################################################
-        self.timer.timeout.connect(self.update_signal) 
-        self.signal_data = fetch_live_signal()
-        self.index = 0
-        self.update_signal()
-        self.timer.start(200)  # Set the update rate (u can use higher number for slower update)
+        # self.is_paused = False
+        # self.is_rewind = False
+        # self.signal_color = 'g'  # the Default color i used (there are other 4 colors)
+        # self.signal_label = "Live Signal"
+        # self.show_signal = True
+        # self.timer = QTimer(self) ######################################################
+        # self.timer.timeout.connect(self.update_signal) 
+        # self.signal_data = fetch_live_signal()
+        # self.index = 0
+        # self.update_signal()
+        # self.timer.start(200)  # Set the update rate (u can use higher number for slower update)
+ 
 
     def initUI(self):
         main_layout = QHBoxLayout()
@@ -84,10 +85,20 @@ class GlueAndLiveGraph(QWidget):
         self.graph_controls_buttons_layout.addWidget(self.export_button)
         self.controls_widget_layout.addLayout(self.graph_controls_buttons_layout)
 
-        self.curve = self.glue_and_live_plot.plot(pen=pg.mkPen("#ff0000", width=5))
+        # self.curve = self.glue_and_live_plot.plot(pen=pg.mkPen("#ff0000", width=5))
 
-        self.play_button.clicked.connect(self.play_live_signal)
-        self.pause_button.clicked.connect(self.pause_live_signal)
+        # self.play_button.clicked.connect(self.play_live_signal)
+        # self.pause_button.clicked.connect(self.pause_live_signal)
+
+        self.cropped_signal_curve1 = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#ff0000"))
+        self.cropped_signal_curve2 = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))  
+        self.glue_output_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))  
+        self.linear_region1 = pg.LinearRegionItem()  
+        self.linear_region2 = pg.LinearRegionItem() 
+
+        self.glue_and_live_plot.removeItem(self.cropped_signal_curve1)
+        self.glue_and_live_plot.removeItem(self.cropped_signal_curve2)
+        self.glue_and_live_plot.removeItem(self.glue_output_curve)
 
 
         
@@ -101,6 +112,46 @@ class GlueAndLiveGraph(QWidget):
         """)
 
 
+    def plot_cropped_signals(self,x1,y1,x2,y2,color1,color2):
+
+         self.cropped_signal_curve1.setData(x1,y1)   
+         self.cropped_signal_curve2.setData(x2,y2)
+         self.cropped_signal_curve1.setPen(pg.mkPen(color=color1))
+         self.cropped_signal_curve2.setPen(pg.mkPen(color=color2))
+         self.fixed_width1 = x1[-1] - x1[0]
+         self.fixed_width2 = x2[-1] - x2[0]
+         self.linear_region1.setRegion([x1[0], x1[-1]])  
+         self.linear_region2.setRegion([x2[0], x2[-1]])  
+
+        #  self.linear_region1.setRegion([self.linear_region1.getRegion()[0], self.linear_region1.getRegion()[0] + self.fixed_width1])
+        #  self.linear_region2.setRegion([self.linear_region2.getRegion()[0], self.linear_region2.getRegion()[0] + self.fixed_width2])
+         
+         self.glue_and_live_plot.addItem(self.cropped_signal_curve1)
+         self.glue_and_live_plot.addItem(self.cropped_signal_curve2)
+
+         self.glue_and_live_plot.addItem(self.linear_region1)
+         self.glue_and_live_plot.addItem(self.linear_region2)
+
+         self.linear_region1.lines[0].setMovable(False)
+         self.linear_region1.lines[1].setMovable(False)
+         self.linear_region2.lines[0].setMovable(False)
+         self.linear_region2.lines[1].setMovable(False)
+         self.linear_region1.sigRegionChanged.connect(self.align_cropped_singals)
+         self.linear_region2.sigRegionChanged.connect(self.align_cropped_singals)
+
+         max_xrange = max(x1[-1],x2[-1])
+         min_xrange = min(x1[0],x2[0])
+         
+
+         self.glue_and_live_plot.setXRange(min_xrange,max_xrange)
+         self.glue_and_live_plot.setLimits(xMin=0)
+
+         
+
+
+
+
+
     def open_glue_signal(self):
         pass
 
@@ -108,24 +159,38 @@ class GlueAndLiveGraph(QWidget):
         pass
 
         
-    def update_signal(self): ##################################################3
-        if not self.is_paused:
-            if self.is_rewind:
-                self.index = max(0, self.index - 1)
-            else:
-                self.index = (self.index + 1) % len(self.signal_data) #ensures that when self.index reaches the end of the signal data, it loops back to the beginning.
+    # def update_signal(self): ##################################################3
+    #     if not self.is_paused:
+    #         if self.is_rewind:
+    #             self.index = max(0, self.index - 1)
+    #         else:
+    #             self.index = (self.index + 1) % len(self.signal_data) #ensures that when self.index reaches the end of the signal data, it loops back to the beginning.
             
-            # Simulate the cine mode by showing a slice of data
-            start_idx = max(0, self.index - 100)
-            end_idx = self.index
-            self.curve.setData(self.signal_data[start_idx:end_idx])
+    #         # Simulate the cine mode by showing a slice of data
+    #         start_idx = max(0, self.index - 100)
+    #         end_idx = self.index
+    #         self.curve.setData(self.signal_data[start_idx:end_idx])
         
-    def play_live_signal(self):
-        self.is_paused = False
-        self.is_rewind = False
+    # def play_live_signal(self):
+    #     self.is_paused = False
+    #     self.is_rewind = False
     
-    def pause_live_signal(self):
-        self.is_paused = True
+    # def pause_live_signal(self):
+    #     self.is_paused = True
+
+    def align_cropped_singals(self):
+         self.linear_region1.setRegion([self.linear_region1.getRegion()[0], self.linear_region1.getRegion()[0] + self.fixed_width1])
+         self.linear_region2.setRegion([self.linear_region2.getRegion()[0], self.linear_region2.getRegion()[0] + self.fixed_width2])
+         cropped_signal1_shift = self.linear_region1.getRegion()[0] - self.cropped_signal_curve1.getData()[0][0]
+         cropped_signal2_shift = self.linear_region2.getRegion()[0] - self.cropped_signal_curve2.getData()[0][0]
+         new_x1 = self.cropped_signal_curve1.getData()[0] + cropped_signal1_shift
+         new_x2 = self.cropped_signal_curve2.getData()[0] + cropped_signal2_shift
+
+         self.cropped_signal_curve1.setData(new_x1, self.cropped_signal_curve1.getData()[1])
+         self.cropped_signal_curve2.setData(new_x2, self.cropped_signal_curve2.getData()[1])
+         
+
+
     
 
 
