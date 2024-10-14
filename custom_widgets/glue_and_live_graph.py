@@ -85,6 +85,9 @@ class GlueAndLiveGraph(QWidget):
         self.graph_controls_buttons_layout.addWidget(self.export_button)
         self.controls_widget_layout.addLayout(self.graph_controls_buttons_layout)
 
+        self.live_radio_button.setChecked(True)
+
+
         # self.curve = self.glue_and_live_plot.plot(pen=pg.mkPen("#ff0000", width=5))
 
         # self.play_button.clicked.connect(self.play_live_signal)
@@ -158,9 +161,18 @@ class GlueAndLiveGraph(QWidget):
     def open_glue_signal(self):
         self.glue_and_live_plot.clear()
         self.glue_and_live_plot.addItem(self.glue_output_curve)
+        
+        if (self.glue_output_curve.getData()[0]) is not None:
+            self.glue_and_live_plot.setXRange(self.glue_output_curve.getData()[0][0],self.glue_output_curve.getData()[0][-1])
+        self.export_button.setEnabled(True)
+        self.play_button.setEnabled(False)
+        self.pause_button.setEnabled(False)
 
     def run_live_signal(self):
         self.glue_and_live_plot.clear()
+        self.export_button.setEnabled(False)
+        self.play_button.setEnabled(True)
+        self.pause_button.setEnabled(True)
 
 
         

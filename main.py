@@ -215,7 +215,6 @@ class MainWindow(QMainWindow):
         self.rectangle_plot2.disable_controls_buttons()
         self.rectangle_plot2.disable_props()
 
-        self.glue_and_live_graph.disable_controls()
 
 
     def cancel_signals_glue(self):
