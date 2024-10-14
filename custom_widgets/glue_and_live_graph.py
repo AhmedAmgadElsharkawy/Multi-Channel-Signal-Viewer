@@ -146,6 +146,9 @@ class GlueAndLiveGraph(QWidget):
          self.glue_and_live_plot.setXRange(min_xrange,max_xrange)
          self.glue_and_live_plot.setLimits(xMin=0)
 
+         self.glue_radio_button.toggled.connect(self.open_glue_signal)
+         self.live_radio_button.toggled.connect(self.run_live_signal)
+
          
 
 
@@ -153,10 +156,12 @@ class GlueAndLiveGraph(QWidget):
 
 
     def open_glue_signal(self):
-        pass
+        self.glue_and_live_plot.clear()
+        self.glue_and_live_plot.addItem(self.glue_output_curve)
 
     def run_live_signal(self):
-        pass
+        self.glue_and_live_plot.clear()
+
 
         
     # def update_signal(self): ##################################################3
@@ -188,6 +193,21 @@ class GlueAndLiveGraph(QWidget):
 
          self.cropped_signal_curve1.setData(new_x1, self.cropped_signal_curve1.getData()[1])
          self.cropped_signal_curve2.setData(new_x2, self.cropped_signal_curve2.getData()[1])
+
+    def disable_controls(self):
+         self.live_radio_button.setEnabled(False)
+         self.glue_radio_button.setEnabled(False)
+         self.play_button.setEnabled(False)
+         self.pause_button.setEnabled(False)
+         self.export_button.setEnabled(False)
+
+    def enable_controls(self):
+         self.live_radio_button.setEnabled(True)
+         self.glue_radio_button.setEnabled(True)
+         self.play_button.setEnabled(True)
+         self.pause_button.setEnabled(True)
+         self.export_button.setEnabled(True)
+
          
 
 
