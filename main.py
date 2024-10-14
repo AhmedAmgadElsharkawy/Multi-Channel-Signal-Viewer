@@ -247,6 +247,7 @@ class MainWindow(QMainWindow):
         self.rectangle_plot1.disable_props()
         self.rectangle_plot2.disable_controls_buttons()
         self.rectangle_plot2.disable_props()
+        self.glue_and_live_graph.disable_controls()
 
 
 
@@ -321,6 +322,8 @@ class MainWindow(QMainWindow):
         self.cancel_interpolation_button.setVisible(True)
         self.interpolate_button.setVisible(True)
         self.interpolation_order_combobox.setVisible(True)
+
+        self.glue_and_live_graph.disable_controls()
 
 
     def interpolate_signals(self):
@@ -418,12 +421,14 @@ class MainWindow(QMainWindow):
             
 
 
-        self.cancel_interpolation()
         self.glue_and_live_graph.glue_output_curve.setData(interpolate_x, interpolate_y)
         self.glue_and_live_graph.glue_radio_button.blockSignals(True)
         self.glue_and_live_graph.glue_radio_button.setChecked(True)
         self.glue_and_live_graph.glue_radio_button.blockSignals(False)
         self.glue_and_live_graph.open_glue_signal()
+        self.cancel_interpolation()
+
+
 
 
 
@@ -447,6 +452,7 @@ class MainWindow(QMainWindow):
         self.glue_and_live_graph.glue_and_live_plot.removeItem(self.glue_and_live_graph.linear_region1)
         self.glue_and_live_graph.glue_and_live_plot.removeItem(self.glue_and_live_graph.linear_region2)
         self.glue_and_live_graph.enable_controls()
+        
 
         
     def update_glue_button(self):
