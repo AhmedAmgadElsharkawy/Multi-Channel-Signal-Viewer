@@ -350,13 +350,17 @@ class RectangleGraph(QWidget):
         self.line_color.setStyleSheet("border: 2px dotted lightgray;")
 
     def enable_props(self):
-        self.label_input_field.setEnabled(True)
-        self.delete_signal_button.setEnabled(True)
-        self.change_signal_label_button.setEnabled(True)
-        self.choose_color_button.setEnabled(True)
-        self.show_hide_checkbox.setEnabled(True)
-        self.move_button.setEnabled(True)
-
+        if len(self.signals) > 0:
+            self.label_input_field.setEnabled(True)
+            self.delete_signal_button.setEnabled(True)
+            self.change_signal_label_button.setEnabled(True)
+            self.choose_color_button.setEnabled(True)
+            self.show_hide_checkbox.setEnabled(True)
+            self.move_button.setEnabled(True)
+            self.line_color.setStyleSheet(f"border: 1px solid {self.signals[self.signals_combobox1.currentIndex()].color}")
+            self.show_hide_checkbox.blockSignals(True)
+            self.show_hide_checkbox.setChecked(self.signals[self.signals_combobox1.currentIndex()].show)
+            self.show_hide_checkbox.blockSignals(False)
 
     def enable_controls_buttons(self):
         self.insert_button1.setEnabled(True)
