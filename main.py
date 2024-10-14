@@ -139,8 +139,8 @@ class MainWindow(QMainWindow):
         self.glue_button.clicked.connect(self.start_signals_glue)
         self.crop_signals_button.clicked.connect(self.crop_signals)
         self.glue_button.setEnabled(False)
-        self.rectangle_plot1.signals_combobox1.currentIndexChanged.connect(self.update_glue_button)
-        self.rectangle_plot2.signals_combobox1.currentIndexChanged.connect(self.update_glue_button)
+        self.rectangle_plot1.signals_combobox.currentIndexChanged.connect(self.update_glue_button)
+        self.rectangle_plot2.signals_combobox.currentIndexChanged.connect(self.update_glue_button)
         self.interpolate_button.clicked.connect(self.interpolate_signals)
 
 
@@ -210,11 +210,14 @@ class MainWindow(QMainWindow):
             *{
                            padding:0px;
                            margin:0px;
+                           background-color: #D4D4D4;
             }
             QPushButton{
                 padding:5px 20px
             }
         """)
+
+        bottom_widget.setStyleSheet("border-radius: 10px;" "border: 1px solid black;")
     
     def start_signals_glue(self):
         self.rectangle_plot1.pauseSignals()
@@ -232,8 +235,8 @@ class MainWindow(QMainWindow):
         self.glue_button.hide()
         self.crop_signals_button.show()
         self.cancel_glue_button.show()
-        signal1_index = self.rectangle_plot1.signals_combobox1.currentIndex()
-        signal2_index = self.rectangle_plot2.signals_combobox1.currentIndex()
+        signal1_index = self.rectangle_plot1.signals_combobox.currentIndex()
+        signal2_index = self.rectangle_plot2.signals_combobox.currentIndex()
         for i,curve in enumerate(self.rectangle_plot1.curves):
             if i == signal1_index:
                 continue
@@ -261,8 +264,8 @@ class MainWindow(QMainWindow):
         self.cancel_glue_button.hide()
         self.crop_signals_button.hide()
 
-        signal1_index = self.rectangle_plot1.signals_combobox1.currentIndex()
-        signal2_index = self.rectangle_plot2.signals_combobox1.currentIndex()
+        signal1_index = self.rectangle_plot1.signals_combobox.currentIndex()
+        signal2_index = self.rectangle_plot2.signals_combobox.currentIndex()
 
         for i,curve in enumerate(self.rectangle_plot1.curves):
             if i == signal1_index:
@@ -286,8 +289,8 @@ class MainWindow(QMainWindow):
         signal_region1 = self.rectangle_plot1.linear_region_item.getRegion()
         signal_region2 = self.rectangle_plot2.linear_region_item.getRegion()
 
-        signal1 = self.rectangle_plot1.signals[self.rectangle_plot1.signals_combobox1.currentIndex()]
-        signal2 = self.rectangle_plot2.signals[self.rectangle_plot2.signals_combobox1.currentIndex()]
+        signal1 = self.rectangle_plot1.signals[self.rectangle_plot1.signals_combobox.currentIndex()]
+        signal2 = self.rectangle_plot2.signals[self.rectangle_plot2.signals_combobox.currentIndex()]
 
         new_x1 = []
         new_y1 = []
@@ -450,7 +453,7 @@ class MainWindow(QMainWindow):
 
         
     def update_glue_button(self):
-        if self.rectangle_plot1.signals_combobox1.currentIndex() >=0 and self.rectangle_plot2.signals_combobox1.currentIndex() >=0:
+        if self.rectangle_plot1.signals_combobox.currentIndex() >=0 and self.rectangle_plot2.signals_combobox.currentIndex() >=0:
             self.glue_button.setEnabled(True)
             self.link_button.setEnabled(True)
         else:
@@ -541,13 +544,13 @@ class MainWindow(QMainWindow):
 
     
     def move_down(self):
-        index = self.rectangle_plot1.signals_combobox1.currentIndex()
+        index = self.rectangle_plot1.signals_combobox.currentIndex()
         signal = self.rectangle_plot1.signals[index]
         self.rectangle_plot1.delete_signal()
         self.rectangle_plot2.signals.append(signal)
         curve = self.rectangle_plot2.rectangle_plot.plot(pen=pg.mkPen(color=signal.color))
         self.rectangle_plot2.curves.append(curve)
-        self.rectangle_plot2.signals_combobox1.addItem(signal.label)
+        self.rectangle_plot2.signals_combobox.addItem(signal.label)
         self.rectangle_plot2.xLimit = max(self.rectangle_plot2.xLimit,len(signal.x))
         self.rectangle_plot2.rewindSignals()
         
@@ -555,13 +558,13 @@ class MainWindow(QMainWindow):
 
 
     def move_up(self):
-        index = self.rectangle_plot2.signals_combobox1.currentIndex()
+        index = self.rectangle_plot2.signals_combobox.currentIndex()
         signal = self.rectangle_plot2.signals[index]
         self.rectangle_plot2.delete_signal()
         self.rectangle_plot1.signals.append(signal)
         curve = self.rectangle_plot1.rectangle_plot.plot(pen=pg.mkPen(color=signal.color))
         self.rectangle_plot1.curves.append(curve)
-        self.rectangle_plot1.signals_combobox1.addItem(signal.label)
+        self.rectangle_plot1.signals_combobox.addItem(signal.label)
         self.rectangle_plot1.xLimit = max(self.rectangle_plot2.xLimit,len(signal.x))
         self.rectangle_plot1.rewindSignals()
 

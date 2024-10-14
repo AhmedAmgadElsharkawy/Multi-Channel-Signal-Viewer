@@ -43,24 +43,24 @@ class RectangleGraph(QWidget):
         self.rectangle_plot.resize(600, 240)
 
         # Create layout for controls and align to the top
-        rectangle_signal_conntrols_widget = QWidget()
+        rectangle_signal_controls_widget = QWidget()
         rectangle_plot_controls = QVBoxLayout()
-        rectangle_signal_conntrols_widget.setLayout(rectangle_plot_controls)
+        rectangle_signal_controls_widget.setLayout(rectangle_plot_controls)
         rectangle_plot_controls.setAlignment(Qt.AlignmentFlag.AlignTop)
-        rectangle_signal_conntrols_widget.setFixedSize(100,200)
+        rectangle_signal_controls_widget.setFixedSize(100,200)
         self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
 
-        self.signals_props1_widget = QWidget()
+        self.signals_props_widget = QWidget()
         signals_props1_layout = QVBoxLayout()
-        self.signals_props1_widget.setLayout(signals_props1_layout)
+        self.signals_props_widget.setLayout(signals_props1_layout)
         # signals_props1_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         # self.signals_props1_widget.setFixedSize(150,200)
-        self.signals_props1_widget.setFixedWidth(190)
-        self.signals_props1_widget.setStyleSheet("background-color:gray")
+        self.signals_props_widget.setFixedWidth(190)
+        self.signals_props_widget.setStyleSheet("background-color:gray")
 
-        self.signals_combobox1 = QComboBox()
-        signals_props1_layout.addWidget(self.signals_combobox1)
-        self.signals_combobox1.currentIndexChanged.connect(self.on_signal_selected)
+        self.signals_combobox = QComboBox()
+        signals_props1_layout.addWidget(self.signals_combobox)
+        self.signals_combobox.currentIndexChanged.connect(self.on_signal_selected)
         
         signal_options_widget = QWidget()
         signal_options_widget_layout = QVBoxLayout()
@@ -122,21 +122,14 @@ class RectangleGraph(QWidget):
         self.linear_region_item.setVisible(False)
         self.rectangle_plot.addItem(self.linear_region_item)
 
-
-        
-
-
-
-
-
         # Create buttons
-        self.insert_button1 = QPushButton()
-        self.play_button1 = QPushButton()
-        self.pause_button1 = QPushButton()
-        self.clear_button1 = QPushButton()
-        self.rewind_button1 = QPushButton()
-        self.speed_up_button1 = QPushButton("")
-        self.speed_down_button1 = QPushButton("")
+        self.insert_button = QPushButton()
+        self.play_button = QPushButton()
+        self.pause_button = QPushButton()
+        self.clear_button = QPushButton()
+        self.rewind_button = QPushButton()
+        self.speed_up_button = QPushButton()
+        self.speed_down_button = QPushButton()
 
         # Add buttons to the layout
         pause_icon = QIcon(); play_icon = QIcon(); add_signal_icon = QIcon(); rewind_button_icon = QIcon(); clear_icon = QIcon(); speed_up_icon = QIcon(); speed_down_icon = QIcon()
@@ -147,39 +140,55 @@ class RectangleGraph(QWidget):
         clear_icon.addPixmap(QPixmap("Images/clean.png"))
         speed_up_icon.addPixmap(QPixmap("Images/forward-button.png"))
         speed_down_icon.addPixmap(QPixmap("Images/rewind-button.png"))
-        self.insert_button1.setIcon(add_signal_icon)
-        self.play_button1.setIcon(play_icon)
-        self.pause_button1.setIcon(pause_icon)
-        self.rewind_button1.setIcon(rewind_button_icon)
-        self.clear_button1.setIcon(clear_icon)
-        self.speed_up_button1.setIcon(speed_up_icon)
-        self.speed_down_button1.setIcon(speed_down_icon)
-        rectangle_plot_controls.addWidget(self.insert_button1)
-        rectangle_plot_controls.addWidget(self.play_button1)
-        rectangle_plot_controls.addWidget(self.pause_button1)
-        rectangle_plot_controls.addWidget(self.rewind_button1)
-        rectangle_plot_controls.addWidget(self.clear_button1)
-        rectangle_plot_controls.addWidget(self.speed_up_button1)
-        rectangle_plot_controls.addWidget(self.speed_down_button1)
-
+        self.insert_button.setIcon(add_signal_icon)
+        self.play_button.setIcon(play_icon)
+        self.pause_button.setIcon(pause_icon)
+        self.rewind_button.setIcon(rewind_button_icon)
+        self.clear_button.setIcon(clear_icon)
+        self.speed_up_button.setIcon(speed_up_icon)
+        self.speed_down_button.setIcon(speed_down_icon)
+        rectangle_plot_controls.addWidget(self.insert_button)
+        rectangle_plot_controls.addWidget(self.play_button)
+        rectangle_plot_controls.addWidget(self.pause_button)
+        rectangle_plot_controls.addWidget(self.rewind_button)
+        rectangle_plot_controls.addWidget(self.clear_button)
+        rectangle_plot_controls.addWidget(self.speed_up_button)
+        rectangle_plot_controls.addWidget(self.speed_down_button)
 
         # Add plot and controls to the container
         rectangle_and_controls_container.addWidget(self.rectangle_plot)
-        rectangle_and_controls_container.addWidget(rectangle_signal_conntrols_widget)
-        rectangle_and_controls_container.addWidget(self.signals_props1_widget)
+        rectangle_and_controls_container.addWidget(rectangle_signal_controls_widget)
+        rectangle_and_controls_container.addWidget(self.signals_props_widget)
 
+        rectangle_signal_controls_widget.setStyleSheet("""
+        QWidget {
+            border: 2px solid black;  /* Define border thickness and color */
+            border-radius: 10px;  /* Optional: Add rounded corners */
+            padding: 10px;  /* Optional: Add padding inside the border */
+            background-color: #ECECEC;
+        }
+        """)   
+
+        self.signals_props_widget.setStyleSheet("""
+        QWidget {
+            border: 1px solid black;  /* Define border thickness and color */
+            border-radius: 10px;  /* Optional: Add rounded corners */
+            padding: 0px;  /* Optional: Add padding inside the border */
+            background-color: #ECECEC;
+        }
+        """)   
 
         # Add the container to the main layout
         self.setLayout(rectangle_and_controls_container)
 
         # Connect insert button to file browser
-        self.insert_button1.clicked.connect(self.browse_file)
-        self.pause_button1.clicked.connect(self.pauseSignals)
-        self.play_button1.clicked.connect(self.playSignals)
-        self.speed_up_button1.clicked.connect(self.increaseSpeed)
-        self.speed_down_button1.clicked.connect(self.decreaseSpeed)
-        self.clear_button1.clicked.connect(self.clearSignals)
-        self.rewind_button1.clicked.connect(self.rewindSignals)
+        self.insert_button.clicked.connect(self.browse_file)
+        self.pause_button.clicked.connect(self.pauseSignals)
+        self.play_button.clicked.connect(self.playSignals)
+        self.speed_up_button.clicked.connect(self.increaseSpeed)
+        self.speed_down_button.clicked.connect(self.decreaseSpeed)
+        self.clear_button.clicked.connect(self.clearSignals)
+        self.rewind_button.clicked.connect(self.rewindSignals)
 
         self.setStyleSheet("""
             QPushButton{
@@ -202,7 +211,7 @@ class RectangleGraph(QWidget):
         self.timer.stop()
         self.signalSpeed = 20
         self.isRunning = True
-        self.signals_combobox1.addItem(signal.label,userData=len(self.signals)-1)
+        self.signals_combobox.addItem(signal.label,userData=len(self.signals)-1)
 
         
         self.ptr = 0
@@ -263,7 +272,7 @@ class RectangleGraph(QWidget):
         self.rectangle_plot.setXRange(0, 1)  # Initial range
         self.rectangle_plot.setYRange(-1, 1)
         self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
-        self.signals_combobox1.clear()
+        self.signals_combobox.clear()
         self.timer.stop()
 
     def rewindSignals(self):
@@ -276,7 +285,7 @@ class RectangleGraph(QWidget):
         self.isRunning = True
         self.timer.start(20)
     def on_signal_selected(self):
-        signal_index = self.signals_combobox1.currentIndex()
+        signal_index = self.signals_combobox.currentIndex()
         if(signal_index < 0): 
             self.disable_props()
             return
@@ -294,8 +303,8 @@ class RectangleGraph(QWidget):
         color = QColorDialog.getColor()
         if color.isValid():
             self.line_color.setStyleSheet(f"border: 1px solid {color.name()};")
-            self.curves[self.signals_combobox1.currentIndex()].setPen(pg.mkPen(color=color.name()))
-            self.signals[self.signals_combobox1.currentIndex()].color = color
+            self.curves[self.signals_combobox.currentIndex()].setPen(pg.mkPen(color=color.name()))
+            self.signals[self.signals_combobox.currentIndex()].color = color
     
     def toggle_curve_show(self):
         self.signals[self.selected_signal].show = not self.signals[self.selected_signal].show
@@ -306,11 +315,11 @@ class RectangleGraph(QWidget):
         self.check_signals_states()
 
     def delete_signal(self):
-        index = self.signals_combobox1.currentIndex()
+        index = self.signals_combobox.currentIndex()
         self.signals.pop(index)
         self.rectangle_plot.removeItem(self.curves[index])
         self.curves.pop(index) 
-        self.signals_combobox1.removeItem(index)
+        self.signals_combobox.removeItem(index)
         self.check_signals_states()
         
 
@@ -331,9 +340,9 @@ class RectangleGraph(QWidget):
         new_label = self.label_input_field.text()
         if new_label == "":
             return
-        index = self.signals_combobox1.currentIndex()
+        index = self.signals_combobox.currentIndex()
         self.signals[index].label = new_label
-        self.signals_combobox1.setItemText(index, new_label)
+        self.signals_combobox.setItemText(index, new_label)
         self.label_input_field.setText("")
         self.label_input_field.setPlaceholderText(new_label)
 
@@ -357,28 +366,28 @@ class RectangleGraph(QWidget):
             self.choose_color_button.setEnabled(True)
             self.show_hide_checkbox.setEnabled(True)
             self.move_button.setEnabled(True)
-            self.line_color.setStyleSheet(f"border: 1px solid {self.signals[self.signals_combobox1.currentIndex()].color}")
+            self.line_color.setStyleSheet(f"border: 1px solid {self.signals[self.signals_combobox.currentIndex()].color}")
             self.show_hide_checkbox.blockSignals(True)
-            self.show_hide_checkbox.setChecked(self.signals[self.signals_combobox1.currentIndex()].show)
+            self.show_hide_checkbox.setChecked(self.signals[self.signals_combobox.currentIndex()].show)
             self.show_hide_checkbox.blockSignals(False)
 
     def enable_controls_buttons(self):
-        self.insert_button1.setEnabled(True)
-        self.play_button1.setEnabled(True)
-        self.pause_button1.setEnabled(True) 
-        self.clear_button1.setEnabled(True) 
-        self.rewind_button1.setEnabled(True)
-        self.speed_up_button1.setEnabled(True)
-        self.speed_down_button1.setEnabled(True)
+        self.insert_button.setEnabled(True)
+        self.play_button.setEnabled(True)
+        self.pause_button.setEnabled(True) 
+        self.clear_button.setEnabled(True) 
+        self.rewind_button.setEnabled(True)
+        self.speed_up_button.setEnabled(True)
+        self.speed_down_button.setEnabled(True)
     
     def disable_controls_buttons(self):
-        self.insert_button1.setEnabled(False)
-        self.play_button1.setEnabled(False)
-        self.pause_button1.setEnabled(False) 
-        self.clear_button1.setEnabled(False) 
-        self.rewind_button1.setEnabled(False)
-        self.speed_up_button1.setEnabled(False)
-        self.speed_down_button1.setEnabled(False)
+        self.insert_button.setEnabled(False)
+        self.play_button.setEnabled(False)
+        self.pause_button.setEnabled(False) 
+        self.clear_button.setEnabled(False) 
+        self.rewind_button.setEnabled(False)
+        self.speed_up_button.setEnabled(False)
+        self.speed_down_button.setEnabled(False)
 
     
         
