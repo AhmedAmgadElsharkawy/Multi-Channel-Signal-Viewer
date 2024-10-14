@@ -4,6 +4,14 @@ from scipy.interpolate import interp1d
 from PyQt6.QtCore import Qt,QTimer
 import requests
 import numpy as np
+import pyqtgraph.exporters as exporters
+from PIL import Image
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import Table, TableStyle
+from reportlab.pdfgen import canvas
+import os
 
 
 def fetch_live_signal():
@@ -84,6 +92,7 @@ class GlueAndLiveGraph(QWidget):
         self.graph_controls_buttons_layout.addWidget(self.pause_button)
         self.graph_controls_buttons_layout.addWidget(self.export_button)
         self.controls_widget_layout.addLayout(self.graph_controls_buttons_layout)
+        self.export_button.clicked.connect(self.export_pdf)
 
         self.live_radio_button.setChecked(True)
 
@@ -221,10 +230,97 @@ class GlueAndLiveGraph(QWidget):
          self.export_button.setEnabled(True)
 
          
+#     from reportlab.lib.pagesizes import letter
+# from reportlab.pdfgen import canvas
+# from reportlab.lib.utils import ImageReader
+# from PyQt5.QtGui import QImage
+# from PIL import Image
+# import exporters  # Assuming this is a valid module or PyQtGraph exporter
 
+    def export_pdf(self):
+        # Export graph as image
+        exporter = exporters.ImageExporter(self.glue_and_live_plot.scene())
+        exporter.params.fileSuffix = 'png'
+        export_filename = "img.png"
+        exporter.export(export_filename)
 
-    
+        # Create a PDF
+        file_name = "report.pdf"
+        pdf = canvas.Canvas(file_name, pagesize=letter)
+        pdf.setFont("Helvetica", 24)
 
+        # Add header text
+        pdf.drawCentredString(320, 670, "Cairo University")
+        pdf.drawCentredString(320, 620, "Multi-Channel-Viewer Report")
 
+        majorLogoPath = './Images/logo-major.png'
+        collegeLogoPath = './Images/collegeLogo.jpg'
+        
+        major_logo = ImageReader(majorLogoPath)
+        college_logo = ImageReader(collegeLogoPath)
+          
+        # Add logos to the PDF
+        pdf.drawImage(major_logo, 10, 725, width=112, height=45)
+        pdf.drawImage(college_logo, 525, 705, width=70, height=70)
+
+        glue_img_name = Image.open(export_filename)
+        glue_img = ImageReader(glue_img_name) 
+        pdf.drawImage(glue_img, 10, 350, width=590, height=150) 
+
+        signal_stats = self.calculate_signal_statistics(self.glue_output_curve.getData())
+
+        data = [['Statistic', 'Value']]
+        stats_items = list(signal_stats.items())
+
+        for i in range(0, len(stats_items)):
+            row = []
+            for j in range(1):
+                if i + j < len(stats_items):
+                    row.append(stats_items[i + j][0])
+                    row.append(str(stats_items[i + j][1]))
+                else:
+                    row.append('') 
+                    row.append('')
+            data.append(row)
+
+        col_widths = [200, 200]
+
+        pdf.drawCentredString(320, 530, "Glue graph")
+
+        pdf.drawCentredString(320, 220, "Statistics for the glue graph")
+
+        table = Table(data, colWidths=col_widths)
+
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12), 
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige), 
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        table.wrapOn(pdf, 400, 400)
+        table.drawOn(pdf, 120, 100) 
+
+        pdf.save()
+
+        os.remove(export_filename)
+
+    def calculate_signal_statistics(self, signal):
+        """Calculate mean, std, duration, min, and max values for the signal."""
+        mean_value = np.mean(signal[1])
+        std_value = np.std(signal[1])
+        min_value = np.min(signal[1])
+        max_value = np.max(signal[1])
+        
+        return {
+            "mean": mean_value,
+            "std": std_value,
+            "min": min_value,
+            "max": max_value
+        }
         
         
