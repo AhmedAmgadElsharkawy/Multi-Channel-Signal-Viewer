@@ -7,9 +7,10 @@ from custom_widgets.rectangle_graph import RectangleGraph
 from custom_widgets.glue_and_live_graph import GlueAndLiveGraph
 import numpy as np
 import pyqtgraph as pg
+import pandas as pd
 import math
 import random
-
+import csv
 
 
 class MainWindow(QMainWindow):
@@ -380,7 +381,10 @@ class RadarWidget(QWidget):
         self.signalSpeed = 50
         self.angle = 0
         self.pointer_length = 100
-        self.points = []
+        self.pointer_x = 0
+        self.pointer_y = 0
+        self.points = self.read_csv()
+        self.drawn_points = []
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.updateRadar)
         self.timer.start(self.signalSpeed)  # Update every 50 milliseconds
@@ -395,15 +399,25 @@ class RadarWidget(QWidget):
         painter.drawEllipse(13, 10, 200, 200)
 
         # Calculate pointer endpoint
-        pointer_x = int(self.width() // 2 + self.pointer_length * math.cos(math.radians(self.angle)))
-        pointer_y = int(self.height() // 2 + self.pointer_length * math.sin(math.radians(self.angle)))
+        self.pointer_x = int(self.width() // 2 + self.pointer_length * math.cos(math.radians(self.angle)))
+        self.pointer_y = int(self.height() // 2 + self.pointer_length * math.sin(math.radians(self.angle)))
 
         # Draw radar pointer
         painter.setPen(QColor("#FF0000"))
-        painter.drawLine(self.width() // 2 , self.height() // 2, pointer_x, pointer_y)
+        painter.drawLine(self.width() // 2 , self.height() // 2, self.pointer_x, self.pointer_y)
+
+                # Calculate new point position along the radar line
+        for point in self.points:
+            if self.is_point_on_line(point[0], point[1], self.width() // 2, self.height() // 2, self.pointer_x, self.pointer_y):
+                self.drawn_points.append(point)
+
+        # Limit the number of points to avoid clutter
+        while len(self.drawn_points) > 20:
+            if len(self.drawn_points) > 20:
+                self.drawn_points.pop(0)  # Remove the oldest point
 
         # Draw points along the radar line
-        for point in self.points:
+        for point in self.drawn_points:
             painter.setBrush(QColor("#00FF00"))
             painter.drawEllipse(int(point[0] - 3), int(point[1] - 3), 6, 6)
 
@@ -412,19 +426,45 @@ class RadarWidget(QWidget):
         self.angle += 5
         self.angle %= 360
 
-        # Calculate new point position along the radar line
-        random_distance = random.uniform(0, self.pointer_length)      
-        point_x = int(self.width() // 2 + random_distance * math.cos(math.radians(self.angle)))
-        point_y = int(self.height() // 2 + random_distance * math.sin(math.radians(self.angle)))
-
-        # Add new point to the list
-        self.points.append((point_x, point_y))
-
-        # Limit the number of points to avoid clutter
-        if len(self.points) > 20:
-            self.points.pop(0)  # Remove the oldest point
-
         self.update()
+
+
+    def is_point_on_line(self, point_x, point_y, line_start_x, line_start_y, line_end_x, line_end_y, tolerance=5):
+        """
+        Check if a point (point_x, point_y) is close to the line segment defined by
+        (line_start_x, line_start_y) and (line_end_x, line_end_y).
+        A tolerance value is used to decide if the point is considered "on" the line.
+        """
+        # Calculate the perpendicular distance from the point to the line segment
+        numerator = abs((line_end_y - line_start_y) * point_x - (line_end_x - line_start_x) * point_y +
+                        line_end_x * line_start_y - line_end_y * line_start_x)
+        denominator = math.sqrt((line_end_y - line_start_y) ** 2 + (line_end_x - line_start_x) ** 2)
+        
+        if denominator == 0:  # Avoid division by zero if the line has zero length
+            return False
+        
+        distance = numerator / denominator
+        
+        # Check if the point is within the tolerance range
+        if distance < tolerance:
+            # Additionally, check if the point is within the line segment bounds
+            if (min(line_start_x, line_end_x) <= point_x <= max(line_start_x, line_end_x)) and \
+            (min(line_start_y, line_end_y) <= point_y <= max(line_start_y, line_end_y)):
+                return True
+
+        return False
+    
+    def read_csv(self):
+        points = []
+        with open("./random_points.csv", newline='') as csvfile:
+            csvreader = csv.reader(csvfile)
+            next(csvreader)  # Skip the header row ('x,y')
+            for row in csvreader:
+                x = int(row[0])  # Convert the x value to an integer
+                y = int(row[1])  # Convert the y value to an integer
+                points.append((x, y))  # Add the point as a tuple (x, y)
+        return points
+
         
     def pauseRadar(self):
         self.timer.stop()
@@ -443,7 +483,7 @@ class RadarWidget(QWidget):
         if self.signalSpeed < 250:
             self.signalSpeed *= 5
         self.timer.start(self.signalSpeed)
-    
+        
 
 def main():
     app = QApplication(sys.argv)
