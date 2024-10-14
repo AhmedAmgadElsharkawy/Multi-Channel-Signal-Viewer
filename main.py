@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QHBoxLayout,QGridLayout,QWidget,QLabel, QPushButton, QCheckBox, QMessageBox,QComboBox,QSizePolicy
+from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QHBoxLayout,QFileDialog,QGridLayout,QWidget,QLabel, QPushButton, QCheckBox, QMessageBox,QComboBox,QSizePolicy
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 from custom_widgets.example import Example
@@ -118,19 +118,36 @@ class MainWindow(QMainWindow):
         self.radar = RadarWidget()
         self.radar_box = QHBoxLayout()
         self.radar_buttons = QVBoxLayout()
-        self.radar_play_button = QPushButton(); self.radar_pause_button = QPushButton(); self.radar_speed_up_button = QPushButton(self); self.radar_speed_down_button = QPushButton(self)
-        self.radar_play_button.setMaximumWidth(60)
-        self.radar_pause_button.setMaximumWidth(60)
-        self.radar_speed_up_button.setMaximumWidth(60)
-        self.radar_speed_down_button.setMaximumWidth(60)
+        self.radar_play_button = QPushButton()
+        self.radar_pause_button = QPushButton()
+        self.radar_speed_up_button = QPushButton()
+        self.radar_speed_down_button = QPushButton()
+        self.radar_open_file_button = QPushButton()
+        self.radar_play_button.setMaximumWidth(40)
+        self.radar_pause_button.setMaximumWidth(40)
+        self.radar_speed_up_button.setMaximumWidth(40)
+        self.radar_speed_down_button.setMaximumWidth(40)
+        self.radar_open_file_button.setMaximumWidth(40)
+        self.radar_play_button.setMaximumHeight(30)
+        self.radar_pause_button.setMaximumHeight(30)
+        self.radar_speed_up_button.setMaximumHeight(30)
+        self.radar_speed_down_button.setMaximumHeight(30)
+        self.radar_open_file_button.setMaximumHeight(30)
+        self.radar_open_file_button.clicked.connect(self.browse_radar_file)
         self.radar_play_button.clicked.connect(self.radar.playRadar)
         self.radar_pause_button.clicked.connect(self.radar.pauseRadar)
         self.radar_speed_up_button.clicked.connect(self.radar.increaseSpeed)
         self.radar_speed_down_button.clicked.connect(self.radar.decreaseSpeed)
+        self.radar_play_button.setEnabled(False)
+        self.radar_pause_button.setEnabled(False)
+        self.radar_speed_up_button.setEnabled(False)
+        self.radar_speed_down_button.setEnabled(False)
         self.radar_play_button.setIcon(play_icon)
         self.radar_pause_button.setIcon(pause_icon)
         self.radar_speed_up_button.setIcon(speed_up_icon)
         self.radar_speed_down_button.setIcon(speed_down_icon)
+        self.radar_open_file_button.setIcon(add_signal_icon)
+        self.radar_buttons.addWidget(self.radar_open_file_button)
         self.radar_buttons.addWidget(self.radar_play_button)
         self.radar_buttons.addWidget(self.radar_pause_button)
         self.radar_buttons.addWidget(self.radar_speed_up_button)
@@ -371,6 +388,17 @@ class MainWindow(QMainWindow):
         self.rectangle_plot1.xLimit = max(self.rectangle_plot2.xLimit,len(signal.x))
         self.rectangle_plot1.rewindSignals()
 
+    def browse_radar_file(self):
+        file_dialog = QFileDialog(self)
+        file_path, _ = file_dialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)")
+        if file_path:
+            self.radar_play_button.setEnabled(True)
+            self.radar_pause_button.setEnabled(True)
+            self.radar_speed_up_button.setEnabled(True)
+            self.radar_speed_down_button.setEnabled(True)
+            self.radar.read_csv(file_path)
+
+
 class RadarWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -383,11 +411,10 @@ class RadarWidget(QWidget):
         self.pointer_length = 100
         self.pointer_x = 0
         self.pointer_y = 0
-        self.points = self.read_csv()
+        self.points = []
         self.drawn_points = []
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.updateRadar)
-        self.timer.start(self.signalSpeed)  # Update every 50 milliseconds
+        self.timer.timeout.connect(self.updateRadar)  # Update every 50 milliseconds
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -396,7 +423,7 @@ class RadarWidget(QWidget):
         # Draw radar background
         painter.setBrush(QColor("#000000"))
         painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawEllipse(13, 10, 200, 200)
+        painter.drawEllipse(24, 10, 200, 200)
 
         # Calculate pointer endpoint
         self.pointer_x = int(self.width() // 2 + self.pointer_length * math.cos(math.radians(self.angle)))
@@ -454,16 +481,16 @@ class RadarWidget(QWidget):
 
         return False
     
-    def read_csv(self):
-        points = []
-        with open("./random_points.csv", newline='') as csvfile:
+    def read_csv(self, radar_data_file):
+        self.points = []
+        with open(radar_data_file, newline='') as csvfile:
             csvreader = csv.reader(csvfile)
             next(csvreader)  # Skip the header row ('x,y')
             for row in csvreader:
                 x = int(row[0])  # Convert the x value to an integer
                 y = int(row[1])  # Convert the y value to an integer
-                points.append((x, y))  # Add the point as a tuple (x, y)
-        return points
+                self.points.append((x, y))  # Add the point as a tuple (x, y)
+        self.timer.start(self.signalSpeed)
 
         
     def pauseRadar(self):
@@ -483,7 +510,7 @@ class RadarWidget(QWidget):
         if self.signalSpeed < 250:
             self.signalSpeed *= 5
         self.timer.start(self.signalSpeed)
-        
+
 
 def main():
     app = QApplication(sys.argv)
