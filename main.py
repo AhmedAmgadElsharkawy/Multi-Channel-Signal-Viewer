@@ -212,22 +212,35 @@ class MainWindow(QMainWindow):
                 padding:0px;
                 margin:0px;
                 color:#ffffff;
+                           
             }
             QPushButton{
                 padding:5px 20px;
                 border:1px solid #000000;
-                color:#ffffff;
-                background-color:gray
+                color:#000000;
+                background-color:white;
+                border-radius:8px;
+                font-size:12px
             }
+            QPushButton:hover{
+                border:2px solid black
+            }
+            QPushButton:disabled{
+                background-color:gray;
+                color:white;
+            }
+         
         """)
 
-        self.glue_and_live_graph.controls_widget.setStyleSheet("""
-             QPushButton{
-                padding:2px 10px;
-                border:1px solid #000000;
-                border-radius:4px;               
-            }   
-        """)
+        
+
+        # self.glue_and_live_graph.controls_widget.setStyleSheet("""
+        #      QPushButton{
+        #         padding:2px 10px;
+        #         border:1px solid #000000;
+        #         border-radius:4px;               
+        #     }   
+        # """)
 
         
 

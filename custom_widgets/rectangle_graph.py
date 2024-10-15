@@ -40,22 +40,24 @@ class RectangleGraph(QWidget):
 
         # Create the plot widget
         self.rectangle_plot = pg.PlotWidget(name='Plot1')
+        self.rectangle_plot.showGrid(x=True, y=True)
         self.rectangle_plot.resize(600, 240)
 
         # Create layout for controls and align to the top
-        rectangle_signal_controls_widget = QWidget()
+        self.rectangle_signal_controls_widget = QWidget()
+        self.rectangle_signal_controls_widget.setObjectName("controls_widget")
         rectangle_plot_controls = QVBoxLayout()
-        rectangle_signal_controls_widget.setLayout(rectangle_plot_controls)
+        self.rectangle_signal_controls_widget.setLayout(rectangle_plot_controls)
         rectangle_plot_controls.setAlignment(Qt.AlignmentFlag.AlignTop)
-        rectangle_signal_controls_widget.setFixedSize(100,200)
         self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
 
         self.signals_props_widget = QWidget()
+        self.signals_props_widget.setObjectName("signal_props_widget")
         signals_props1_layout = QVBoxLayout()
         self.signals_props_widget.setLayout(signals_props1_layout)
         # signals_props1_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         # self.signals_props1_widget.setFixedSize(150,200)
-        self.signals_props_widget.setFixedWidth(190)
+        self.signals_props_widget.setFixedWidth(300)
         # self.signals_props_widget.setStyleSheet("background-color:gray")
 
         self.signals_combobox = QComboBox()
@@ -82,10 +84,12 @@ class RectangleGraph(QWidget):
         signal_color_widget = QWidget()
         signal_color_widget_layout = QHBoxLayout()
         self.line_color = QWidget()
-        self.line_color.setFixedSize(70,1)
+        self.line_color.setFixedSize(170,1)
         self.choose_color_button = QPushButton("Choose")
         # signal_color_widget_layout.addWidget(color_label)
+        signal_color_widget_layout.addStretch()
         signal_color_widget_layout.addWidget(self.line_color)
+        signal_color_widget_layout.addStretch()
         signal_color_widget_layout.addWidget(self.choose_color_button)
         # signal_color_widget_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         signal_color_widget.setLayout(signal_color_widget_layout)
@@ -106,16 +110,17 @@ class RectangleGraph(QWidget):
         signal_buttons_widget.setLayout(signal_buttons_widget_layout)
         # update_signal_props_button = QPushButton("Update")
         self.delete_signal_button = QPushButton("Delete")
-        self.move_button = QPushButton(f"Move")
+        self.move_button = QPushButton("Move")
+        self.move_button.setFixedHeight(20)
+        self.delete_signal_button.setFixedHeight(20)
         # signal_buttons_widget_layout.addWidget(update_signal_props_button)
         signal_buttons_widget_layout.addWidget(self.move_button)
         signal_buttons_widget_layout.addWidget(self.delete_signal_button)
-
         signal_options_widget_layout.addWidget(signal_buttons_widget)
         # signal_options_widget.setStyleSheet("background-color:red")
         # update_signal_props_button.clicked.connect(self.save_signals_props)
         self.delete_signal_button.clicked.connect(self.delete_signal)
-        signal_buttons_widget.setFixedWidth(150)
+        
 
         self.disable_props()
         self.linear_region_item = pg.LinearRegionItem(movable=True)
@@ -130,9 +135,12 @@ class RectangleGraph(QWidget):
         self.rewind_button = QPushButton()
         self.speed_up_button = QPushButton()
         self.speed_down_button = QPushButton()
+        self.disable_controls_buttons()
+        self.insert_button.setEnabled(True)
 
         # Add buttons to the layout
-        pause_icon = QIcon(); play_icon = QIcon(); add_signal_icon = QIcon(); rewind_button_icon = QIcon(); clear_icon = QIcon(); speed_up_icon = QIcon(); speed_down_icon = QIcon()
+        pause_icon = QIcon(); play_icon = QIcon(); add_signal_icon = QIcon(); 
+        rewind_button_icon = QIcon(); clear_icon = QIcon(); speed_up_icon = QIcon(); speed_down_icon = QIcon()
         add_signal_icon.addPixmap(QPixmap("Images/plus.png"))
         pause_icon.addPixmap(QPixmap("Images/pause.png"))
         play_icon.addPixmap(QPixmap("Images/play.png"))
@@ -156,8 +164,12 @@ class RectangleGraph(QWidget):
         rectangle_plot_controls.addWidget(self.speed_down_button)
 
         # Add plot and controls to the container
-        rectangle_and_controls_container.addWidget(self.rectangle_plot)
-        rectangle_and_controls_container.addWidget(rectangle_signal_controls_widget)
+        controls_and_plot = QWidget()
+        controls_and_plot_layout = QHBoxLayout()
+        controls_and_plot.setLayout(controls_and_plot_layout)
+        controls_and_plot_layout.addWidget(self.rectangle_plot)
+        controls_and_plot_layout.addWidget(self.rectangle_signal_controls_widget)
+        rectangle_and_controls_container.addWidget(controls_and_plot)
         rectangle_and_controls_container.addWidget(self.signals_props_widget)
 
         # rectangle_signal_controls_widget.setStyleSheet("""
@@ -187,27 +199,67 @@ class RectangleGraph(QWidget):
         self.speed_down_button.clicked.connect(self.decreaseSpeed)
         self.clear_button.clicked.connect(self.clearSignals)
         self.rewind_button.clicked.connect(self.rewindSignals)
+        self.setStyleSheet(
+            """
+            *{
+                padding:0px;
+                margin:0px;
+            }
+            #signal_props_widget{
+                border:1px solid gray;
+                border-radius:20px
+            }
+            #controls_widget QPushButton{
+                padding:5px 20px;
+            }
+    """
+        )
         self.signals_props_widget.setStyleSheet("""
             QPushButton{
                         border:none;
-                        background-color:gray;
-                        padding:0px 0px;
-                        border-radius:4px
+                        background-color:white;
+                        padding:3px;
+                        border-radius:4px;
+                        color:black;
+
             }   
+            QPushButton:hover{
+                    border:1px solid black 
+                            }
+            QPushButton:disabled{
+                    background-color:gray;
+                    color:white
+                }
             QLineEdit{
+                    background-color:white;
+                    color:black;
+            } 
+            QLineEdit:disabled{
                     background-color:gray;
                     color:white;
-            }                                             
-
-""")
-        
-        rectangle_signal_controls_widget.setStyleSheet("""
-
-        QPushButton{
-            border-radius:6px;
-                    padding:3px;                                    
+            } 
+            QComboBox {
+                    background-color:white;
+                    color:black;
+                                                }    
+            QComboBox:disabled {
+                background-color: gray;
+                color: white;
             }
+            PlotWidget{
+            background-color:white}                                
+
 """)
+
+        
+        
+#         rectangle_signal_controls_widget.setStyleSheet("""
+
+#         QPushButton{
+#             border-radius:6px;
+#                     padding:3px;                                    
+#             }
+# """)
 
 
 
@@ -302,8 +354,11 @@ class RectangleGraph(QWidget):
         signal_index = self.signals_combobox.currentIndex()
         if(signal_index < 0): 
             self.disable_props()
+            self.disable_controls_buttons()
+            self.insert_button.setEnabled(True)
             return
         self.enable_props()
+        self.enable_controls_buttons()
         selected_signal = self.signals[signal_index]
         self.label_input_field.setPlaceholderText(selected_signal.label)
         self.line_color.setStyleSheet(f"border: 2px solid {selected_signal.color};")

@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget,QHBoxLayout,QVBoxLayout,QPushButton,QRadioButton,QButtonGroup,QLabel
+from PyQt6.QtGui import QIcon, QPixmap
 import pyqtgraph as pg
-from scipy.interpolate import interp1d
-from PyQt6.QtCore import Qt,QTimer
+from PyQt6.QtCore import QTimer
 import requests
 import numpy as np
 import threading
@@ -19,7 +19,7 @@ import os
 def fetch_live_signal_async(callback):
     url = "https://rest.coinapi.io/v1/exchangerate/BTC/USD"
     headers = {
-        'X-CoinAPI-Key': 'be094979-cff5-4872-b993-d9c360e39def',  # Replace with your CoinAPI Key
+        'X-CoinAPI-Key': 'E43E17F1-A0C9-4315-95B7-20C26CA43B89',  # Replace with your CoinAPI Key
     }
 
     def run():
@@ -67,6 +67,7 @@ class GlueAndLiveGraph(QWidget):
         main_layout = QHBoxLayout()
 
         self.glue_and_live_plot = pg.PlotWidget()
+        self.glue_and_live_plot.showGrid(x = True,y = True)
         main_layout.addWidget(self.glue_and_live_plot)
         self.setFixedHeight(240)
         self.setFixedWidth(1200)
@@ -98,10 +99,21 @@ class GlueAndLiveGraph(QWidget):
 
         self.controls_widget_layout.addStretch()
 
+        pause_icon = QIcon()
+        play_icon = QIcon()
+        export_icon = QIcon()
+        pause_icon.addPixmap(QPixmap("Images/pause.png"))
+        play_icon.addPixmap(QPixmap("Images/play.png"))
+        export_icon.addPixmap(QPixmap("Images/export.png"))
+        
+
         self.graph_controls_buttons_layout = QVBoxLayout()
-        self.play_button = QPushButton("play")
-        self.pause_button = QPushButton("pause")
-        self.export_button = QPushButton("export")
+        self.play_button = QPushButton()
+        self.pause_button = QPushButton()
+        self.play_button.setIcon(play_icon)
+        self.pause_button.setIcon(pause_icon)
+        self.export_button = QPushButton()
+        self.export_button.setIcon(export_icon)
         self.graph_controls_buttons_layout.addWidget(self.play_button)
         self.graph_controls_buttons_layout.addWidget(self.pause_button)
         self.graph_controls_buttons_layout.addWidget(self.export_button)
