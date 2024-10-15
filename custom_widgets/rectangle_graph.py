@@ -56,7 +56,7 @@ class RectangleGraph(QWidget):
         # signals_props1_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         # self.signals_props1_widget.setFixedSize(150,200)
         self.signals_props_widget.setFixedWidth(190)
-        self.signals_props_widget.setStyleSheet("background-color:gray")
+        # self.signals_props_widget.setStyleSheet("background-color:gray")
 
         self.signals_combobox = QComboBox()
         signals_props1_layout.addWidget(self.signals_combobox)
@@ -160,23 +160,21 @@ class RectangleGraph(QWidget):
         rectangle_and_controls_container.addWidget(rectangle_signal_controls_widget)
         rectangle_and_controls_container.addWidget(self.signals_props_widget)
 
-        rectangle_signal_controls_widget.setStyleSheet("""
-        QWidget {
-            border: 2px solid black;  /* Define border thickness and color */
-            border-radius: 10px;  /* Optional: Add rounded corners */
-            padding: 10px;  /* Optional: Add padding inside the border */
-            background-color: #ECECEC;
-        }
-        """)   
+        # rectangle_signal_controls_widget.setStyleSheet("""
+        # # QWidget {
+        # #     border: 2px solid black;  /* Define border thickness and color */
+        # #     border-radius: 10px;  /* Optional: Add rounded corners */
+        # #     padding: 10px;  /* Optional: Add padding inside the border */
+        # # }
+        # # """)   
 
-        self.signals_props_widget.setStyleSheet("""
-        QWidget {
-            border: 1px solid black;  /* Define border thickness and color */
-            border-radius: 10px;  /* Optional: Add rounded corners */
-            padding: 0px;  /* Optional: Add padding inside the border */
-            background-color: #ECECEC;
-        }
-        """)   
+        # # self.signals_props_widget.setStyleSheet("""
+        # # QWidget {
+        # #     border: 1px solid black;  /* Define border thickness and color */
+        # #     border-radius: 10px;  /* Optional: Add rounded corners */
+        # #     padding: 0px;  /* Optional: Add padding inside the border */
+        # # }
+        # # """)   
 
         # Add the container to the main layout
         self.setLayout(rectangle_and_controls_container)
@@ -189,12 +187,28 @@ class RectangleGraph(QWidget):
         self.speed_down_button.clicked.connect(self.decreaseSpeed)
         self.clear_button.clicked.connect(self.clearSignals)
         self.rewind_button.clicked.connect(self.rewindSignals)
-
-        self.setStyleSheet("""
+        self.signals_props_widget.setStyleSheet("""
             QPushButton{
-                           padding:3px 5px
+                        border:none;
+                        background-color:gray;
+                        padding:0px 0px;
+                        border-radius:4px
+            }   
+            QLineEdit{
+                    background-color:gray;
+                    color:white;
+            }                                             
+
+""")
+        
+        rectangle_signal_controls_widget.setStyleSheet("""
+
+        QPushButton{
+            border-radius:6px;
+                    padding:3px;                                    
             }
-        """)
+""")
+
 
 
 

@@ -202,22 +202,39 @@ class MainWindow(QMainWindow):
 
 
 
+
         # set main layout of central widget
         self.link_button.stateChanged.connect(self.link_button_changed)
         central_widget.setLayout(main_layout)
 
         self.setStyleSheet("""
             *{
-                           padding:0px;
-                           margin:0px;
-                           background-color: #D4D4D4;
+                padding:0px;
+                margin:0px;
+                color:#ffffff;
             }
             QPushButton{
-                padding:5px 20px
+                padding:5px 20px;
+                border:1px solid #000000;
+                color:#ffffff;
+                background-color:gray
             }
         """)
 
-        bottom_widget.setStyleSheet("border-radius: 10px;" "border: 1px solid black;")
+        self.glue_and_live_graph.controls_widget.setStyleSheet("""
+             QPushButton{
+                padding:2px 10px;
+                border:1px solid #000000;
+                border-radius:4px;               
+            }   
+        """)
+
+        
+
+
+
+
+        
     
     def start_signals_glue(self):
         self.rectangle_plot1.pauseSignals()
