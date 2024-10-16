@@ -231,24 +231,7 @@ class MainWindow(QMainWindow):
             }
          
         """)
-
-        
-
-        # self.glue_and_live_graph.controls_widget.setStyleSheet("""
-        #      QPushButton{
-        #         padding:2px 10px;
-        #         border:1px solid #000000;
-        #         border-radius:4px;               
-        #     }   
-        # """)
-
-        
-
-
-
-
-        
-    
+           
     def start_signals_glue(self):
         self.rectangle_plot1.pauseSignals()
         self.rectangle_plot2.pauseSignals()
