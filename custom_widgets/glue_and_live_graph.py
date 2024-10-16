@@ -242,10 +242,10 @@ class GlueAndLiveGraph(QWidget):
          min_xrange = min(x1[0],x2[0])
          
 
-         self.glue_and_live_plot.setXRange(min_xrange,max_xrange)
-         self.glue_and_live_plot.setLimits(xMin=0)
-         self.glue_and_live_plot.setYRange(-1,1)
+         self.glue_and_live_plot.setLimits(xMin=0,xMax = None)
          self.glue_and_live_plot.setLimits(yMin = -2 , yMax = 2)
+         self.glue_and_live_plot.setXRange(min_xrange,max_xrange)
+         self.glue_and_live_plot.setYRange(-1,1)
 
 
          
@@ -260,8 +260,15 @@ class GlueAndLiveGraph(QWidget):
         self.glue_and_live_plot.removeItem(self.glue_output_curve)
         self.glue_and_live_plot.addItem(self.glue_output_curve)
         if (self.glue_output_curve.getData()[0]) is not None:
-            self.glue_and_live_plot.setXRange(max(0,self.glue_output_curve.getData()[0][1]-1),self.glue_output_curve.getData()[0][-1])
-            
+            self.glue_and_live_plot.setXRange(self.glue_output_curve.getData()[0][0],self.glue_output_curve.getData()[0][-1])
+            self.glue_and_live_plot.setLimits(xMin = max(0,self.glue_output_curve.getData()[0][0] - 0.5),xMax = self.glue_output_curve.getData()[0][-1] + 0.5)
+            self.glue_and_live_plot.setYRange(-2,2)
+            self.glue_and_live_plot.setLimits(yMin = -3,yMax = 3)
+        else:
+            self.glue_and_live_plot.setXRange(0,1)
+            self.glue_and_live_plot.setLimits(xMin = 0,xMax = 1)
+            self.glue_and_live_plot.setYRange(-1,1)
+            self.glue_and_live_plot.setLimits(yMin = -2,yMax = 2)
         self.enable_controls()
 
     def run_live_signal(self):
