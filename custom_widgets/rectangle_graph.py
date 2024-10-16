@@ -286,6 +286,7 @@ class RectangleGraph(QWidget):
         self.rectangle_plot.setLabel('bottom', 'Time', 's')
         self.rectangle_plot.setXRange(0, 1)  # Initial range
         self.rectangle_plot.setYRange(-1, 1)
+        self.rectangle_plot.setLimits(yMin = -2, yMax = 2)
 
         # Set up the QTimer
         self.timer.start(self.signalSpeed)  # 20 milliseconds
@@ -298,7 +299,7 @@ class RectangleGraph(QWidget):
                     if len(self.signals[i].x) >= self.ptr:
                         curve.setData(self.signals[i].x[:self.ptr], self.signals[i].y[:self.ptr])  # Update each curve
                         if self.ptr / 1000 > 1:
-                            self.rectangle_plot.setLimits(xMin=0, xMax=((self.ptr / 1000)), yMin=-2, yMax=2)
+                            self.rectangle_plot.setLimits(xMin=0, xMax=((self.ptr / 1000)))
             self.ptr += 1
             self.rectangle_plot.setXRange((self.ptr / 1000), (self.ptr / 1000))
 
