@@ -231,7 +231,7 @@ class MainWindow(QMainWindow):
             }
          
         """)
-           
+
     def start_signals_glue(self):
         self.rectangle_plot1.pauseSignals()
         self.rectangle_plot2.pauseSignals()
@@ -616,7 +616,8 @@ class RadarWidget(QWidget):
         self.setWindowTitle('Radar Simulation')
         self.setGeometry(0, 0, 200, 200)
 
-        self.signalSpeed = 50
+        self.signal_speed = 50
+        self.data_size = 0
         self.angle = 0
         self.pointer_length = 100
         self.points = []
@@ -649,12 +650,13 @@ class RadarWidget(QWidget):
                 self.drawn_points.append(point)
 
         # Limit the number of points to avoid clutter
-        while len(self.drawn_points) > 20:
-            if len(self.drawn_points) > 20:
+        while len(self.drawn_points) > self.data_size * 0.5:
+            if len(self.drawn_points) > self.data_size * 0.5:
                 self.drawn_points.pop(0)  # Remove the oldest point
 
         # Draw points along the radar line
         for point in self.drawn_points:
+            painter.setPen(Qt.PenStyle.NoPen)  
             painter.setBrush(QColor("#00FF00"))
             painter.drawEllipse(int(point[0] - 3), int(point[1] - 3), 6, 6)
 
@@ -696,14 +698,45 @@ class RadarWidget(QWidget):
     
     def read_csv(self, radar_data_file):
         self.points = []
-        with open(radar_data_file, newline='') as csvfile:
-            csvreader = csv.reader(csvfile)
-            next(csvreader)  # Skip the header row ('x,y')
-            for row in csvreader:
-                x = int(row[0])  # Convert the x value to an integer
-                y = int(row[1])  # Convert the y value to an integer
-                self.points.append((x, y))  # Add the point as a tuple (x, y)
-        self.timer.start(self.signalSpeed)
+        file_data = pd.read_csv(radar_data_file).iloc[:, 0:2]
+        data_size = len(file_data)
+
+        unique_data = {}
+        
+
+        min_time = 1000
+        max_time = 0
+        min_amp = 1000
+        max_amp = -1000
+        for i in range(1, data_size):
+            min_time = min(min_time, file_data.iloc[i, 0])
+            max_time = max(max_time, file_data.iloc[i, 0])
+            min_amp = min(min_amp, file_data.iloc[i, 1])
+            max_amp = max(max_amp, file_data.iloc[i, 1])
+
+        # print(min_time, max_time)
+        # print(min_amp, max_amp)
+
+        for i in range(1, data_size):
+            if unique_data.get(file_data.iloc[i, 1]) is None:
+                new_time_value = (((math.floor(file_data.iloc[i, 0] * 10) / 10) - min_time) / (max_time - min_time)) * (210 - 0)
+                new_amplitude_value = (((math.floor(file_data.iloc[i, 1] * 10) / 10) - min_amp) / (max_amp - min_amp)) * (210 - 0)
+                unique_data[file_data.iloc[i, 1]] = 1
+                self.points.append((new_time_value, new_amplitude_value))
+
+        self.data_size = len(self.points)
+        self.timer.start(self.signal_speed)
+            
+
+        # with open(radar_data_file, newline='') as csvfile:
+        #     csvreader = csv.reader(csvfile)
+        #     next(csvreader)  # Skip the header row ('x,y')
+        #     print(csvreader[0])
+        #     for row in csvreader:
+        #         x = int(row[0])  # Convert the x value to an integer
+        #         y = int(row[1])  # Convert the y value to an integer
+        #         self.points.append((x, y))  # Add the point as a tuple (x, y)
+        # self.timer.start(self.signal_speed)
 
     def clear_radar(self):
         self.points = []
@@ -714,19 +747,19 @@ class RadarWidget(QWidget):
         self.timer.stop()
 
     def playRadar(self):
-        self.timer.start(self.signalSpeed)
+        self.timer.start(self.signal_speed)
 
     def increaseSpeed(self):
         self.timer.stop()
-        if self.signalSpeed > 10:
-            self.signalSpeed = int(self.signalSpeed / 5)
-        self.timer.start(self.signalSpeed)
+        if self.signal_speed > 10:
+            self.signal_speed = int(self.signal_speed / 5)
+        self.timer.start(self.signal_speed)
 
     def decreaseSpeed(self):
         self.timer.stop()
-        if self.signalSpeed < 250:
-            self.signalSpeed *= 5
-        self.timer.start(self.signalSpeed)
+        if self.signal_speed < 250:
+            self.signal_speed *= 5
+        self.timer.start(self.signal_speed)
 
 def main():
     app = QApplication(sys.argv)

@@ -239,12 +239,6 @@ class GlueAndLiveGraph(QWidget):
          self.glue_radio_button.toggled.connect(self.open_glue_signal)
          self.live_radio_button.toggled.connect(self.run_live_signal)
 
-         
-
-
-
-
-
     def open_glue_signal(self):
         self.timer.stop()
         self.glue_and_live_plot.removeItem(self.live_curve)
