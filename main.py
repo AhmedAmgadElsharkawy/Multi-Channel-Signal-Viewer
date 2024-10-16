@@ -299,7 +299,6 @@ class MainWindow(QMainWindow):
         self.glue_and_live_graph.enable_controls()
 
     def crop_signals(self):
-        self.glue_and_live_graph.glue_and_live_plot.removeItem(self.glue_and_live_graph.glue_output_curve)
         signal_region1 = self.rectangle_plot1.linear_region_item.getRegion()
         signal_region2 = self.rectangle_plot2.linear_region_item.getRegion()
 
@@ -334,12 +333,11 @@ class MainWindow(QMainWindow):
         self.glue_and_live_graph.plot_cropped_signals(new_x1,new_y1,new_x2,new_y2,signal1.color,signal2.color)
 
         self.cancel_signals_glue()
+        self.glue_and_live_graph.disable_controls()
         self.glue_button.setVisible(False)
         self.cancel_interpolation_button.setVisible(True)
         self.interpolate_button.setVisible(True)
         self.interpolation_order_combobox.setVisible(True)
-
-        self.glue_and_live_graph.disable_controls()
 
 
     def interpolate_signals(self):
@@ -463,11 +461,12 @@ class MainWindow(QMainWindow):
         self.cancel_interpolation_button.setVisible(False)
         self.glue_button.setVisible(True)
         self.interpolation_order_combobox.setVisible(False)
-        self.glue_and_live_graph.glue_and_live_plot.removeItem(self.glue_and_live_graph.cropped_signal_curve1)
-        self.glue_and_live_graph.glue_and_live_plot.removeItem(self.glue_and_live_graph.cropped_signal_curve2)
-        self.glue_and_live_graph.glue_and_live_plot.removeItem(self.glue_and_live_graph.linear_region1)
-        self.glue_and_live_graph.glue_and_live_plot.removeItem(self.glue_and_live_graph.linear_region2)
+        self.glue_and_live_graph.glue_and_live_plot.clear()
         self.glue_and_live_graph.enable_controls()
+        if self.glue_and_live_graph.live_radio_button.isChecked():
+            self.glue_and_live_graph.run_live_signal()
+        else:
+            self.glue_and_live_graph.open_glue_signal()
         
 
         

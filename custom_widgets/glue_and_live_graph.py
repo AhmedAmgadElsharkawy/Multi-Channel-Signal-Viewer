@@ -165,9 +165,15 @@ class GlueAndLiveGraph(QWidget):
             self.full_signal_data.append(current_price)
             self.full_time_data.append(self.index)
             self.index += 1
-
             # Update the plot with all data
             self.live_curve.setData(self.full_time_data, self.full_signal_data)
+            min_value = min(self.full_signal_data)
+            max_value = max(self.full_signal_data)
+            self.glue_and_live_plot.setLimits(yMin=min_value - 1, yMax=max_value + 1)
+            if(self.full_time_data[-1] < 100):
+                self.glue_and_live_plot.setLimits(xMax = 100)
+            else:
+                self.glue_and_live_plot.setLimits(xMax = self.full_time_data[-1])
             # Set X range to start from 0 and slide forward if auto-scrolling is enabled
             if self.auto_scroll_enabled:
                 if self.index > self.window_size:
@@ -196,13 +202,16 @@ class GlueAndLiveGraph(QWidget):
     def play_signal(self):
         self.is_paused = False
         self.is_rewind = False
+        self.timer.start(self.fetching_rate)
 
     def pause_signal(self):
         self.is_paused = True
-        print(self.live_curve.getData()[0][0])
+        self.timer.stop()
+
         
 
     def plot_cropped_signals(self,x1,y1,x2,y2,color1,color2):
+         self.pause_signal()
 
          self.cropped_signal_curve1.setData(x1,y1)   
          self.cropped_signal_curve2.setData(x2,y2)
@@ -233,11 +242,11 @@ class GlueAndLiveGraph(QWidget):
          min_xrange = min(x1[0],x2[0])
          
 
+         self.glue_and_live_plot.setLimits(xMin=0,xMax = None)
+         self.glue_and_live_plot.setLimits(yMin = -2 , yMax = 2)
          self.glue_and_live_plot.setXRange(min_xrange,max_xrange)
-         self.glue_and_live_plot.setLimits(xMin=0)
+         self.glue_and_live_plot.setYRange(-1,1)
 
-         self.glue_radio_button.toggled.connect(self.open_glue_signal)
-         self.live_radio_button.toggled.connect(self.run_live_signal)
 
     def open_glue_signal(self):
         self.timer.stop()
@@ -245,8 +254,15 @@ class GlueAndLiveGraph(QWidget):
         self.glue_and_live_plot.removeItem(self.glue_output_curve)
         self.glue_and_live_plot.addItem(self.glue_output_curve)
         if (self.glue_output_curve.getData()[0]) is not None:
-            self.glue_and_live_plot.setXRange(max(0,self.glue_output_curve.getData()[0][1]-1),self.glue_output_curve.getData()[0][-1])
-            
+            self.glue_and_live_plot.setXRange(self.glue_output_curve.getData()[0][0],self.glue_output_curve.getData()[0][-1])
+            self.glue_and_live_plot.setLimits(xMin = max(0,self.glue_output_curve.getData()[0][0] - 0.5),xMax = self.glue_output_curve.getData()[0][-1] + 0.5)
+            self.glue_and_live_plot.setYRange(-2,2)
+            self.glue_and_live_plot.setLimits(yMin = -3,yMax = 3)
+        else:
+            self.glue_and_live_plot.setXRange(0,1)
+            self.glue_and_live_plot.setLimits(xMin = 0,xMax = 1)
+            self.glue_and_live_plot.setYRange(-1,1)
+            self.glue_and_live_plot.setLimits(yMin = -2,yMax = 2)
         self.enable_controls()
 
     def run_live_signal(self):
