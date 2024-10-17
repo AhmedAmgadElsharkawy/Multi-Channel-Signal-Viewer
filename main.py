@@ -313,6 +313,8 @@ class MainWindow(QMainWindow):
 
         signal1 = self.rectangle_plot1.signals[self.rectangle_plot1.signals_combobox.currentIndex()]
         signal2 = self.rectangle_plot2.signals[self.rectangle_plot2.signals_combobox.currentIndex()]
+        print(signal1.color)
+        print(signal2.color)
 
         new_x1 = []
         new_y1 = []
@@ -340,7 +342,7 @@ class MainWindow(QMainWindow):
         new_y2 = np.array(new_y2)
 
         self.glue_and_live_graph.plot_cropped_signals(new_x1,new_y1,new_x2,new_y2,signal1.color,signal2.color)
-
+        
         self.cancel_signals_glue()
         self.glue_and_live_graph.disable_controls()
         self.glue_button.setVisible(False)

@@ -370,8 +370,9 @@ class RectangleGraph(QWidget):
     def open_color_dialog(self):
         color = QColorDialog.getColor()
         if color.isValid():
-            self.line_color.setStyleSheet(f"border: 1px solid {color.name()};")
-            self.curves[self.signals_combobox.currentIndex()].setPen(pg.mkPen(color=color.name()))
+            color = color.name()
+            self.line_color.setStyleSheet(f"border: 1px solid {color};")
+            self.curves[self.signals_combobox.currentIndex()].setPen(pg.mkPen(color=color))
             self.signals[self.signals_combobox.currentIndex()].color = color
     
     def toggle_curve_show(self):

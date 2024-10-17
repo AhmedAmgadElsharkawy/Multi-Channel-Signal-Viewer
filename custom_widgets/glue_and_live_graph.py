@@ -42,7 +42,7 @@ def fetch_live_signal_async(callback):
 class GlueAndLiveGraph(QWidget):
     def __init__(self):
         super().__init__()
-        self.fetching_rate = 500
+        self.fetching_rate = 5000
         self.is_paused = False
         self.is_rewind = False
         self.signal_color = 'g'  
@@ -194,7 +194,6 @@ class GlueAndLiveGraph(QWidget):
 
     def plot_cropped_signals(self,x1,y1,x2,y2,color1,color2):
          self.pause_signal()
-
          self.cropped_signal_curve1.setData(x1,y1)   
          self.cropped_signal_curve2.setData(x2,y2)
          self.cropped_signal_curve1.setPen(pg.mkPen(color=color1))
