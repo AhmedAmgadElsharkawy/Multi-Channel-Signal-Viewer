@@ -19,7 +19,7 @@ import os
 def fetch_live_signal_async(callback):
     url = "https://rest.coinapi.io/v1/exchangerate/BTC/USD"
     headers = {
-        'X-CoinAPI-Key': '34003F68-BA58-4C50-9D10-94C68C64FD5F',  # Replace with your CoinAPI Key
+        'X-CoinAPI-Key': '34003F68-BA58-4C50-9D10-94C68C64FD5F',  
     }
 
     def run():
@@ -27,7 +27,7 @@ def fetch_live_signal_async(callback):
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 data = response.json()
-                rate = float(data['rate'])  # Fetch the Bitcoin price in USD
+                rate = float(data['rate'])  
                 callback(rate)
             else:
                 print(f"Error fetching data: {response.status_code} - {response.text}")
@@ -45,21 +45,19 @@ class GlueAndLiveGraph(QWidget):
         self.fetching_rate = 500
         self.is_paused = False
         self.is_rewind = False
-        self.signal_color = 'g'  # Default color
+        self.signal_color = 'g'  
         self.signal_label = "Live Bitcoin Price Signal"
         self.show_signal = True
-        self.auto_scroll_enabled = True  # To track if auto-scrolling is enabled
+        self.auto_scroll_enabled = True  
 
-        # Initialize timer for updating the signal
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_signal)
-        self.full_signal_data = []  # Store all historical data
-        self.full_time_data = []    # Store all historical time data
-        self.index = 0              # Index for the time axis
-        self.window_size = 100      # Number of points to display in the sliding window
+        self.full_signal_data = []  
+        self.full_time_data = []   
+        self.index = 0             
+        self.window_size = 100      
         self.initUI()
 
-        # Start the timer to update every 1000 ms (1 second)
         self.timer.start(self.fetching_rate)
  
 
@@ -79,8 +77,6 @@ class GlueAndLiveGraph(QWidget):
 
 
         self.choose_signals_buttons_layout = QVBoxLayout()
-        # self.live_signal_button = QPushButton("Live")
-        # self.choose_signals_buttons_layout.addWidget(self.live_signal_button)
         self.choose_signal_label = QLabel("Choose Signal:")
         self.choose_signals_buttons_layout.addWidget(self.choose_signal_label)
         self.radio_buttons_group = QButtonGroup()
@@ -123,12 +119,6 @@ class GlueAndLiveGraph(QWidget):
         self.export_button.clicked.connect(self.export_pdf)
 
 
-
-        # self.curve = self.glue_and_live_plot.plot(pen=pg.mkPen("#ff0000", width=5))
-
-        # self.play_button.clicked.connect(self.play_live_signal)
-        # self.pause_button.clicked.connect(self.pause_live_signal)
-
         self.cropped_signal_curve1 = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#ff0000"))
         self.cropped_signal_curve2 = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))  
         self.glue_output_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))  
@@ -156,16 +146,13 @@ class GlueAndLiveGraph(QWidget):
 
     def update_signal(self):
         if not self.is_paused:
-            # Fetch the data asynchronously and update when it arrives
             fetch_live_signal_async(self.process_new_price)
 
     def process_new_price(self, current_price):
         if current_price is not None:
-            # Append new data to the full historical signal and time data
             self.full_signal_data.append(current_price)
             self.full_time_data.append(self.index)
             self.index += 1
-            # Update the plot with all data
             self.live_curve.setData(self.full_time_data, self.full_signal_data)
             min_value = min(self.full_signal_data)
             max_value = max(self.full_signal_data)
@@ -175,7 +162,6 @@ class GlueAndLiveGraph(QWidget):
                 self.glue_and_live_plot.setLimits(xMax = self.window_size)
             else:
                 self.glue_and_live_plot.setLimits(xMax = self.full_time_data[-1])
-            # Set X range to start from 0 and slide forward if auto-scrolling is enabled
             if self.auto_scroll_enabled:
                 if self.index > self.window_size:
                     self.glue_and_live_plot.setXRange(self.index - self.window_size, self.index)
@@ -184,19 +170,14 @@ class GlueAndLiveGraph(QWidget):
 
 
     def on_manual_interaction(self, event):
-        """Disable auto-scrolling when the user manually interacts with the graph."""
         self.auto_scroll_enabled = False
 
     def on_range_change(self):
-        """Re-enable auto-scrolling when the user is no longer manually interacting."""
-        # This event gets triggered whenever the range of the view changes, e.g., when scrolling or panning.
         if not self.auto_scroll_enabled:
-            self.timer.singleShot(5000, self.reset_auto_scroll)  # Allow manual interaction for 5 seconds
+            self.timer.singleShot(5000, self.reset_auto_scroll)  
 
     def reset_auto_scroll(self):
-        """Re-enable auto-scrolling after a delay, assuming the user is done interacting."""
         self.auto_scroll_enabled = True
-        # After re-enabling auto-scroll, move the view to the latest data
         if self.index > self.window_size:
             self.glue_and_live_plot.setXRange(self.index - self.window_size, self.index)
 
@@ -223,8 +204,6 @@ class GlueAndLiveGraph(QWidget):
          self.linear_region1.setRegion([x1[0], x1[-1]])  
          self.linear_region2.setRegion([x2[0], x2[-1]])  
 
-        #  self.linear_region1.setRegion([self.linear_region1.getRegion()[0], self.linear_region1.getRegion()[0] + self.fixed_width1])
-        #  self.linear_region2.setRegion([self.linear_region2.getRegion()[0], self.linear_region2.getRegion()[0] + self.fixed_width2])
          self.glue_and_live_plot.clear()
          self.glue_and_live_plot.addItem(self.cropped_signal_curve1)
          self.glue_and_live_plot.addItem(self.cropped_signal_curve2)
@@ -293,26 +272,6 @@ class GlueAndLiveGraph(QWidget):
         self.enable_controls()
 
 
-        
-    # def update_signal(self): ##################################################3
-    #     if not self.is_paused:
-    #         if self.is_rewind:
-    #             self.index = max(0, self.index - 1)
-    #         else:
-    #             self.index = (self.index + 1) % len(self.signal_data) #ensures that when self.index reaches the end of the signal data, it loops back to the beginning.
-            
-    #         # Simulate the cine mode by showing a slice of data
-    #         start_idx = max(0, self.index - 100)
-    #         end_idx = self.index
-    #         self.curve.setData(self.signal_data[start_idx:end_idx])
-        
-    # def play_live_signal(self):
-    #     self.is_paused = False
-    #     self.is_rewind = False
-    
-    # def pause_live_signal(self):
-    #     self.is_paused = True
-
     def align_cropped_singals(self):
          self.linear_region1.setRegion([self.linear_region1.getRegion()[0], self.linear_region1.getRegion()[0] + self.fixed_width1])
          self.linear_region2.setRegion([self.linear_region2.getRegion()[0], self.linear_region2.getRegion()[0] + self.fixed_width2])
@@ -343,15 +302,6 @@ class GlueAndLiveGraph(QWidget):
              self.pause_button.setEnabled(False)
              self.export_button.setEnabled(True)
              
-
-
-         
-#     from reportlab.lib.pagesizes import letter
-# from reportlab.pdfgen import canvas
-# from reportlab.lib.utils import ImageReader
-# from PyQt5.QtGui import QImage
-# from PIL import Image
-# import exporters  # Assuming this is a valid module or PyQtGraph exporter
 
     def export_pdf(self):
         # Export graph as image
