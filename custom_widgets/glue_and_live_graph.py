@@ -19,7 +19,7 @@ import os
 def fetch_live_signal_async(callback):
     url = "https://rest.coinapi.io/v1/exchangerate/BTC/USD"
     headers = {
-        'X-CoinAPI-Key': 'E43E17F1-A0C9-4315-95B7-20C26CA43B89',  # Replace with your CoinAPI Key
+        'X-CoinAPI-Key': '34003F68-BA58-4C50-9D10-94C68C64FD5F',  # Replace with your CoinAPI Key
     }
 
     def run():
@@ -42,7 +42,7 @@ def fetch_live_signal_async(callback):
 class GlueAndLiveGraph(QWidget):
     def __init__(self):
         super().__init__()
-        self.fetching_rate = 5000
+        self.fetching_rate = 500
         self.is_paused = False
         self.is_rewind = False
         self.signal_color = 'g'  # Default color
