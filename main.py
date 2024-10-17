@@ -313,8 +313,6 @@ class MainWindow(QMainWindow):
 
         signal1 = self.rectangle_plot1.signals[self.rectangle_plot1.signals_combobox.currentIndex()]
         signal2 = self.rectangle_plot2.signals[self.rectangle_plot2.signals_combobox.currentIndex()]
-        print(signal1.color)
-        print(signal2.color)
 
         new_x1 = []
         new_y1 = []
