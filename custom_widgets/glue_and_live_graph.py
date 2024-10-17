@@ -53,11 +53,11 @@ class GlueAndLiveGraph(QWidget):
         # Initialize timer for updating the signal
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_signal)
-        self.initUI()
         self.full_signal_data = []  # Store all historical data
         self.full_time_data = []    # Store all historical time data
         self.index = 0              # Index for the time axis
         self.window_size = 100      # Number of points to display in the sliding window
+        self.initUI()
 
         # Start the timer to update every 1000 ms (1 second)
         self.timer.start(self.fetching_rate)
@@ -170,8 +170,9 @@ class GlueAndLiveGraph(QWidget):
             min_value = min(self.full_signal_data)
             max_value = max(self.full_signal_data)
             self.glue_and_live_plot.setLimits(yMin=min_value - 1, yMax=max_value + 1)
-            if(self.full_time_data[-1] < 100):
-                self.glue_and_live_plot.setLimits(xMax = 100)
+            self.glue_and_live_plot.setYRange(min_value-1,max_value+1)
+            if(self.full_time_data[-1] < self.window_size):
+                self.glue_and_live_plot.setLimits(xMax = self.window_size)
             else:
                 self.glue_and_live_plot.setLimits(xMax = self.full_time_data[-1])
             # Set X range to start from 0 and slide forward if auto-scrolling is enabled
@@ -266,15 +267,29 @@ class GlueAndLiveGraph(QWidget):
         self.enable_controls()
 
     def run_live_signal(self):
+        self.play_signal()
         self.glue_and_live_plot.removeItem(self.glue_output_curve)
         self.glue_and_live_plot.removeItem(self.live_curve)
         self.glue_and_live_plot.addItem(self.live_curve)
-        if (self.live_curve.getData()[0]) is not None:
-            self.glue_and_live_plot.setXRange(max(0,self.live_curve.getData()[0][-1]-3),self.live_curve.getData()[0][-1])
+        if len(self.full_time_data) != 0:
+            self.glue_and_live_plot.setLimits(xMin = 0,xMax = max(self.full_time_data[-1],self.window_size),yMin = min(self.full_signal_data)-1,yMax= max(self.full_signal_data)+1)
+            self.glue_and_live_plot.setYRange(min(self.full_signal_data)-1,max(self.full_signal_data)+1)
+            if self.full_time_data[-1] >= self.window_size:
+                self.glue_and_live_plot.setXRange(self.full_time_data[-1] - self.window_size ,self.full_time_data[-1])
+            else:
+                self.glue_and_live_plot.setXRange(0,self.window_size)
+        else:
+            self.glue_and_live_plot.setLimits(xMin = 0,xMax = self.window_size,yMin = -2,yMax= 2)
             self.glue_and_live_plot.setYRange(-1,1)
+            self.glue_and_live_plot.setXRange(0,self.window_size)
+
+
+
+
+                
         self.glue_and_live_plot.setLimits(xMin=0)
 
-        self.timer.start(self.fetching_rate)
+        self.play_signal()
         self.enable_controls()
 
 

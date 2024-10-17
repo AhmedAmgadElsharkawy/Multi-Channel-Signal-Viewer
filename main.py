@@ -25,6 +25,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         central_widget = QWidget()
+        central_widget.setObjectName("central-widget")
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout()
         main_layout.setSpacing(0)  # Set spacing to zero
@@ -107,6 +108,7 @@ class MainWindow(QMainWindow):
         self.link_h_box.addWidget(glue_widget)
         self.glue_button = QPushButton("Glue")
         self.interpolation_order_combobox = QComboBox()
+        self.interpolation_order_combobox.setObjectName("interpolation-order-combobox")
         self.interpolation_orders = [
             "Nearest Neighbor",
             "Linear",
@@ -229,7 +231,14 @@ class MainWindow(QMainWindow):
                 background-color:gray;
                 color:white;
             }
-         
+
+            #central-widget{
+                background-color:#201c1c
+            }
+           
+            #interpolation-order-combobox{
+                padding:3px 7px           
+                }
         """)
 
     def start_signals_glue(self):

@@ -61,6 +61,7 @@ class RectangleGraph(QWidget):
         # self.signals_props_widget.setStyleSheet("background-color:gray")
 
         self.signals_combobox = QComboBox()
+        self.signals_combobox.setObjectName("signals-commbobox")
         signals_props1_layout.addWidget(self.signals_combobox)
         self.signals_combobox.currentIndexChanged.connect(self.on_signal_selected)
         
@@ -233,6 +234,7 @@ class RectangleGraph(QWidget):
             QLineEdit{
                     background-color:white;
                     color:black;
+                    padding:0px 5px
             } 
             QLineEdit:disabled{
                     background-color:gray;
@@ -249,17 +251,13 @@ class RectangleGraph(QWidget):
             PlotWidget{
             background-color:white}                                
 
+            #signals-commbobox{
+                    padding:0px 8px
+                                                }
 """)
-
         
-        
-#         rectangle_signal_controls_widget.setStyleSheet("""
 
-#         QPushButton{
-#             border-radius:6px;
-#                     padding:3px;                                    
-#             }
-# """)
+
 
 
 
