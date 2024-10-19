@@ -100,7 +100,7 @@ class RectangleGraph(QWidget):
 
         signal_checkbox_widget = QWidget()
         signal_checkbox_widget_layout = QHBoxLayout()
-        self.show_hide_checkbox = QCheckBox("Show")
+        self.show_hide_checkbox = QCheckBox("Visible")
         signal_checkbox_widget_layout.addWidget(self.show_hide_checkbox)
         signal_checkbox_widget.setLayout(signal_checkbox_widget_layout)
         self.show_hide_checkbox.stateChanged.connect(self.toggle_curve_show)

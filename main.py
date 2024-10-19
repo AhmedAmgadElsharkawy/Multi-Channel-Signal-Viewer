@@ -114,7 +114,6 @@ class MainWindow(QMainWindow):
             "Linear",
             "Polynomial",
             "Cubic",
-            "Spline",
             "Barycentric"
         ]
         self.interpolation_order_combobox.addItems(self.interpolation_orders)
@@ -422,9 +421,6 @@ class MainWindow(QMainWindow):
                 f = interp1d(combined_x, combined_y, kind='linear', fill_value="extrapolate")
             elif interpolate_order == 'Cubic':
                 f = interp1d(combined_x, combined_y, kind='cubic', fill_value="extrapolate")
-            elif interpolate_order == 'Spline':
-                tck = splrep(combined_x, combined_y, s=0)
-                f = lambda x: splev(x, tck)
             elif interpolate_order == 'Barycentric':
                 f = BarycentricInterpolator(combined_x, combined_y)
             elif interpolate_order == 'Nearest Neighbor':
