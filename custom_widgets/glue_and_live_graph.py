@@ -61,6 +61,7 @@ class GlueAndLiveGraph(QWidget):
         self.full_time_data = []   
         self.index = 0             
         self.window_size = 100      
+        self.signals_overlap = False
         self.initUI()
 
         self.timer.start(self.fetching_rate)
@@ -124,10 +125,10 @@ class GlueAndLiveGraph(QWidget):
         self.interpolation_order_combobox.setFixedWidth(77)
         self.interpolation_order_combobox.addItems(self.interpolation_orders)
         self.interpolation_order_combobox.setVisible(False)
-        self.interpolation_order_combobox.currentIndexChanged.connect(self.lock_cropped_signals)
+        self.interpolation_order_combobox.currentIndexChanged.connect(self.interpolate_cropped_signals)
         self.lock_button = QPushButton("Lock")
         self.unlock_button = QPushButton("Unlock")
-        self.lock_button.clicked.connect(self.lock_cropped_signals)
+        self.lock_button.clicked.connect(self.interpolate_cropped_signals)
         self.unlock_button.clicked.connect(self.unlock_cropped_signals)
         self.unlock_button.setVisible(False)
         self.lock_button.setVisible(False)
@@ -326,12 +327,14 @@ class GlueAndLiveGraph(QWidget):
          else:
              self.lock_button.setVisible(False)
              self.play_button.setVisible(False)
-             self.pause_button.setVisible(False)
-             self.export_button.setVisible(True)
-             self.interpolation_order_combobox.setVisible(True)
-             self.unlock_button.setVisible(True)
+             self.pause_button.setVisible(False)            
+             if(self.glue_output_curve.getData()[0] is not None):
+                self.export_button.setVisible(True)   
+                self.unlock_button.setVisible(True)
+                if(not self.signals_overlap):
+                    self.interpolation_order_combobox.setVisible(True)
 
-    def lock_cropped_signals(self):
+    def interpolate_cropped_signals(self):
         interpolate_order = self.interpolation_orders[self.interpolation_order_combobox.currentIndex()]
         self.cropped_signal1_data = self.cropped_signal_curve1.getData()
         self.cropped_signal2_data = self.cropped_signal_curve2.getData()
@@ -345,11 +348,11 @@ class GlueAndLiveGraph(QWidget):
         gap2 = signal1_x[0] - signal2_x[-1]
 
         if gap1 == 0:
-            self.interpolation_order_combobox.setVisible(False)
+            self.signals_overlap = True
             interpolate_x = np.concatenate([signal1_x, signal2_x])
             interpolate_y = np.concatenate([signal1_y, signal2_y])
         elif gap1 < 0 and gap2 < 0:
-            self.interpolation_order_combobox.setVisible(False)
+            self.signals_overlap = True
             intersection_start = max(signal1_x[0], signal2_x[0])
             intersection_end = min(signal1_x[-1], signal2_x[-1])
 
@@ -391,7 +394,7 @@ class GlueAndLiveGraph(QWidget):
             interpolate_x = interpolate_x[sorted_indices]
             interpolate_y = interpolate_y[sorted_indices]
         else:
-            self.interpolation_order_combobox.setVisible(True)
+            self.signals_overlap = False
             if gap1 > 0:
                 combined_x = np.concatenate([signal1_x, signal2_x])
                 combined_y = np.concatenate([signal1_y, signal2_y])
@@ -430,7 +433,6 @@ class GlueAndLiveGraph(QWidget):
         self.glue_radio_button.setChecked(True)
         self.glue_radio_button.blockSignals(False)
         self.open_glue_signal()
-        # self.cancel_interpolation()
              
 
     def unlock_cropped_signals(self):
