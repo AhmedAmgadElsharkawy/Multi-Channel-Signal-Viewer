@@ -114,17 +114,17 @@ class GlueAndLiveGraph(QWidget):
         self.play_button.setIcon(play_icon)
         self.pause_button.setIcon(pause_icon)
         self.interpolation_order_combobox = QComboBox()
-        self.interpolation_order_combobox.setObjectName("interpolation-order-combobox")
         self.interpolation_orders = [
             "Nearest",
             "Linear",
             "Polynomial",
             "Cubic",
-            "Barycentric"
+            # "Barycentric"
         ]
         self.interpolation_order_combobox.setFixedWidth(77)
         self.interpolation_order_combobox.addItems(self.interpolation_orders)
         self.interpolation_order_combobox.setVisible(False)
+        self.interpolation_order_combobox.currentIndexChanged.connect(self.lock_cropped_signals)
         self.lock_button = QPushButton("Lock")
         self.unlock_button = QPushButton("Unlock")
         self.lock_button.clicked.connect(self.lock_cropped_signals)
@@ -160,7 +160,8 @@ class GlueAndLiveGraph(QWidget):
         self.glue_and_live_plot.scene().sigMouseClicked.connect(self.on_manual_interaction)
         self.glue_and_live_plot.sigRangeChanged.connect(self.on_range_change)
         self.live_radio_button.setChecked(True)
-        
+
+
         self.setLayout(main_layout)
 
         self.setStyleSheet("""
@@ -267,7 +268,7 @@ class GlueAndLiveGraph(QWidget):
         if (self.glue_output_curve.getData()[0]) is not None:
             self.glue_and_live_plot.setXRange(self.glue_output_curve.getData()[0][0],self.glue_output_curve.getData()[0][-1])
             self.glue_and_live_plot.setLimits(xMin = max(0,self.glue_output_curve.getData()[0][0]),xMax = self.glue_output_curve.getData()[0][-1])
-            self.glue_and_live_plot.setYRange(-2,2)
+            self.glue_and_live_plot.setYRange(min(self.glue_output_curve.getData()[1]),max(self.glue_output_curve.getData()[1]))
             self.glue_and_live_plot.setLimits(yMin = min(self.glue_output_curve.getData()[1]),yMax = max(self.glue_output_curve.getData()[1]))
         else:
             self.glue_and_live_plot.setXRange(0,1)
@@ -397,11 +398,11 @@ class GlueAndLiveGraph(QWidget):
             if gap1 > 0:
                 combined_x = np.concatenate([signal1_x, signal2_x])
                 combined_y = np.concatenate([signal1_y, signal2_y])
-                gap_x = np.linspace(signal1_x[-1], signal2_x[0], num=math.floor(gap1*0.001))  
+                gap_x = np.linspace(signal1_x[-1], signal2_x[0], num=math.ceil(gap1*1000))  
             else:
                 combined_x = np.concatenate([signal2_x, signal1_x])
                 combined_y = np.concatenate([signal2_y, signal1_y])
-                gap_x = np.linspace(signal2_x[-1], signal1_x[0], num=math.floor(gap2*0.001))  
+                gap_x = np.linspace(signal2_x[-1], signal1_x[0], num=math.ceil(gap2*1000))  
 
                 
 
@@ -409,15 +410,14 @@ class GlueAndLiveGraph(QWidget):
                 f = interp1d(combined_x, combined_y, kind='linear', fill_value="extrapolate")
             elif interpolate_order == 'Cubic':
                 f = interp1d(combined_x, combined_y, kind='cubic', fill_value="extrapolate")
-            elif interpolate_order == 'Barycentric':
-                f = BarycentricInterpolator(combined_x, combined_y)
+            # elif interpolate_order == 'Barycentric':
+            #     f = BarycentricInterpolator(combined_x, combined_y)
             elif interpolate_order == 'Nearest':
                 f = interp1d(combined_x, combined_y, kind='nearest', fill_value="extrapolate")
             elif interpolate_order == 'Polynomial':
                 degree = min(len(combined_x) - 1, 3) 
                 coefficients = Polynomial.fit(combined_x, combined_y, degree)
                 f = lambda x: coefficients(x)
-
             gap_y = f(gap_x)
             if(gap1>0):
                 interpolate_x = np.concatenate([signal1_x, gap_x, signal2_x])

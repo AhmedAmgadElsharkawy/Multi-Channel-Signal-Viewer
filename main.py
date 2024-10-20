@@ -448,10 +448,6 @@ class MainWindow(QMainWindow):
 
 
 
-
-
-
-
             
 
 
