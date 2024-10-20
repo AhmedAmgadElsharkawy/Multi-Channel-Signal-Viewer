@@ -292,14 +292,8 @@ class GlueAndLiveGraph(QWidget):
         else:
             self.glue_and_live_plot.setLimits(xMin = 0,xMax = self.window_size,yMin = -2,yMax= 2)
             self.glue_and_live_plot.setYRange(-1,1)
-            self.glue_and_live_plot.setXRange(0,self.window_size)
-
-
-
-
-                
+            self.glue_and_live_plot.setXRange(0,self.window_size)   
         self.glue_and_live_plot.setLimits(xMin=0)
-
         self.play_signal()
         self.enable_controls()
 
@@ -323,19 +317,19 @@ class GlueAndLiveGraph(QWidget):
          self.live_radio_button.setEnabled(True)
          self.glue_radio_button.setEnabled(True)
          if self.live_radio_button.isChecked():
-            self.play_button.setVisible(True)
-            self.pause_button.setVisible(True)
             self.export_button.setVisible(False)
             self.interpolation_order_combobox.setVisible(False)
             self.unlock_button.setVisible(False)
             self.lock_button.setVisible(False)
+            self.play_button.setVisible(True)
+            self.pause_button.setVisible(True)
          else:
+             self.lock_button.setVisible(False)
              self.play_button.setVisible(False)
              self.pause_button.setVisible(False)
              self.export_button.setVisible(True)
              self.interpolation_order_combobox.setVisible(True)
              self.unlock_button.setVisible(True)
-             self.lock_button.setVisible(False)
 
     def lock_cropped_signals(self):
         interpolate_order = self.interpolation_orders[self.interpolation_order_combobox.currentIndex()]
@@ -351,9 +345,11 @@ class GlueAndLiveGraph(QWidget):
         gap2 = signal1_x[0] - signal2_x[-1]
 
         if gap1 == 0:
+            self.interpolation_order_combobox.setVisible(False)
             interpolate_x = np.concatenate([signal1_x, signal2_x])
             interpolate_y = np.concatenate([signal1_y, signal2_y])
         elif gap1 < 0 and gap2 < 0:
+            self.interpolation_order_combobox.setVisible(False)
             intersection_start = max(signal1_x[0], signal2_x[0])
             intersection_end = min(signal1_x[-1], signal2_x[-1])
 
@@ -395,6 +391,7 @@ class GlueAndLiveGraph(QWidget):
             interpolate_x = interpolate_x[sorted_indices]
             interpolate_y = interpolate_y[sorted_indices]
         else:
+            self.interpolation_order_combobox.setVisible(True)
             if gap1 > 0:
                 combined_x = np.concatenate([signal1_x, signal2_x])
                 combined_y = np.concatenate([signal1_y, signal2_y])
