@@ -271,7 +271,7 @@ class MainWindow(QMainWindow):
         self.rectangle_plot1.disable_props()
         self.rectangle_plot2.disable_controls_buttons()
         self.rectangle_plot2.disable_props()
-        self.glue_and_live_graph.disable_controls()
+        # self.glue_and_live_graph.disable_controls()
 
 
 
@@ -304,7 +304,7 @@ class MainWindow(QMainWindow):
         self.rectangle_plot2.enable_controls_buttons()
         self.rectangle_plot2.enable_props()
 
-        self.glue_and_live_graph.enable_controls()
+        # self.glue_and_live_graph.enable_controls()
 
     def crop_signals(self):
         signal_region1 = self.rectangle_plot1.linear_region_item.getRegion()
@@ -338,14 +338,13 @@ class MainWindow(QMainWindow):
         new_x2 = np.array(new_x2)
         new_y2 = np.array(new_y2)
 
-        self.glue_and_live_graph.plot_cropped_signals(new_x1,new_y1,new_x2,new_y2,signal1.color,signal2.color)
-        
         self.cancel_signals_glue()
+        self.glue_and_live_graph.plot_cropped_signals(new_x1,new_y1,new_x2,new_y2,signal1.color,signal2.color)
         self.glue_and_live_graph.disable_controls()
-        self.glue_button.setVisible(False)
-        self.cancel_interpolation_button.setVisible(True)
-        self.interpolate_button.setVisible(True)
-        self.interpolation_order_combobox.setVisible(True)
+        self.glue_button.setVisible(True)
+        # self.cancel_interpolation_button.setVisible(True)
+        # self.interpolate_button.setVisible(True)
+        # self.interpolation_order_combobox.setVisible(True)
 
 
     def interpolate_signals(self):

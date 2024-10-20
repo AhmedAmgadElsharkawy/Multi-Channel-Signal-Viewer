@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget,QHBoxLayout,QVBoxLayout,QPushButton,QRadioButton,QButtonGroup,QLabel
+from PyQt6.QtWidgets import QWidget,QHBoxLayout,QVBoxLayout,QPushButton,QRadioButton,QButtonGroup,QLabel,QComboBox
 from PyQt6.QtGui import QIcon, QPixmap
 import pyqtgraph as pg
 from PyQt6.QtCore import QTimer
@@ -108,10 +108,29 @@ class GlueAndLiveGraph(QWidget):
         self.pause_button = QPushButton()
         self.play_button.setIcon(play_icon)
         self.pause_button.setIcon(pause_icon)
+        self.interpolation_order_combobox = QComboBox()
+        self.interpolation_order_combobox.setObjectName("interpolation-order-combobox")
+        self.interpolation_orders = [
+            "Nearest",
+            "Linear",
+            "Polynomial",
+            "Cubic",
+            "Barycentric"
+        ]
+        self.interpolation_order_combobox.setFixedWidth(77)
+        self.interpolation_order_combobox.addItems(self.interpolation_orders)
+        self.interpolation_order_combobox.setVisible(False)
+        self.lock_button = QPushButton("Lock")
+        self.unlock_button = QPushButton("Unlock")
+        self.unlock_button.setVisible(False)
+        self.lock_button.setVisible(False)
         self.export_button = QPushButton()
         self.export_button.setIcon(export_icon)
         self.graph_controls_buttons_layout.addWidget(self.play_button)
         self.graph_controls_buttons_layout.addWidget(self.pause_button)
+        self.graph_controls_buttons_layout.addWidget(self.interpolation_order_combobox)
+        self.graph_controls_buttons_layout.addWidget(self.lock_button)
+        self.graph_controls_buttons_layout.addWidget(self.unlock_button)
         self.graph_controls_buttons_layout.addWidget(self.export_button)
         self.controls_widget_layout.addLayout(self.graph_controls_buttons_layout)
         self.pause_button.clicked.connect(self.pause_signal)
@@ -193,6 +212,10 @@ class GlueAndLiveGraph(QWidget):
         
 
     def plot_cropped_signals(self,x1,y1,x2,y2,color1,color2):
+         self.lock_button.setVisible(True)
+         self.play_button.setVisible(False)
+         self.pause_button.setVisible(False)
+         self.export_button.setVisible(False)
          self.pause_signal()
          self.cropped_signal_curve1.setData(x1,y1)   
          self.cropped_signal_curve2.setData(x2,y2)
@@ -293,13 +316,19 @@ class GlueAndLiveGraph(QWidget):
          self.live_radio_button.setEnabled(True)
          self.glue_radio_button.setEnabled(True)
          if self.live_radio_button.isChecked():
-            self.play_button.setEnabled(True)
-            self.pause_button.setEnabled(True)
-            self.export_button.setEnabled(False)
+            self.play_button.setVisible(True)
+            self.pause_button.setVisible(True)
+            self.export_button.setVisible(False)
+            self.interpolation_order_combobox.setVisible(False)
+            self.unlock_button.setVisible(False)
+            self.lock_button.setVisible(False)
          else:
-             self.play_button.setEnabled(False)
-             self.pause_button.setEnabled(False)
-             self.export_button.setEnabled(True)
+             self.play_button.setVisible(False)
+             self.pause_button.setVisible(False)
+             self.export_button.setVisible(True)
+             self.interpolation_order_combobox.setVisible(True)
+             self.unlock_button.setVisible(True)
+             self.lock_button.setVisible(True)
              
 
     def export_pdf(self):
