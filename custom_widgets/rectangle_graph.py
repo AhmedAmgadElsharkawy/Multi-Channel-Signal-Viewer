@@ -13,6 +13,8 @@ class RectangleGraph(QWidget):
         # self.setStyleSheet("background-color:red")
         self.signals = []
         self.xLimit = 0
+        self.yMinLimit = 0
+        self.yMaxLimit = 0
         self.isRunning = False
         self.signalSpeed = 20
         self.timer = QTimer()
@@ -49,7 +51,7 @@ class RectangleGraph(QWidget):
         rectangle_plot_controls = QVBoxLayout()
         self.rectangle_signal_controls_widget.setLayout(rectangle_plot_controls)
         rectangle_plot_controls.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
+        self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-1, yMax=1)
 
         self.signals_props_widget = QWidget()
         self.signals_props_widget.setObjectName("signal_props_widget")
@@ -270,6 +272,9 @@ class RectangleGraph(QWidget):
         signal = Signal(file_path,len(self.signals))
         if len(signal.x) > self.xLimit:
             self.xLimit = len(signal.x)
+        for point in signal.y:
+            self.yMinLimit = min(self.yMinLimit, point)
+            self.yMaxLimit = max(self.yMaxLimit, point)
         signal.color = self.colors[len(self.signals)%len(self.colors)]
         self.signals.append(signal)
         self.timer.stop()
@@ -283,8 +288,8 @@ class RectangleGraph(QWidget):
         self.curves.append(curve)
         self.rectangle_plot.setLabel('bottom', 'Time', 's')
         self.rectangle_plot.setXRange(0, 1)  # Initial range
-        self.rectangle_plot.setYRange(-1, 1)
-        self.rectangle_plot.setLimits(yMin = -2, yMax = 2)
+        self.rectangle_plot.setYRange(self.yMinLimit, self.yMaxLimit)
+        self.rectangle_plot.setLimits(yMin=self.yMinLimit, yMax=self.yMaxLimit)
 
         # Set up the QTimer
         self.timer.start(self.signalSpeed)  # 20 milliseconds
@@ -336,7 +341,10 @@ class RectangleGraph(QWidget):
         self.rectangle_plot.addItem(self.linear_region_item)
         self.rectangle_plot.setXRange(0, 1)  # Initial range
         self.rectangle_plot.setYRange(-1, 1)
-        self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
+        self.yMinLimit = 0
+        self.yMaxLimit = 0
+        self.xLimit = 0
+        self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin = -1, yMax = 1)
         self.signals_combobox.clear()
         self.timer.stop()
 
@@ -345,8 +353,8 @@ class RectangleGraph(QWidget):
         self.ptr = 0
         self.signalSpeed = 20
         self.rectangle_plot.setXRange(0, 1)  # Initial range
-        self.rectangle_plot.setYRange(-1, 1)
-        self.rectangle_plot.setLimits(xMin=0, xMax=1, yMin=-2, yMax=2)
+        self.rectangle_plot.setYRange(self.yMinLimit, self.yMaxLimit)
+        self.rectangle_plot.setLimits(xMin=0, xMax=1)
         self.isRunning = True
         self.timer.start(20)
     def on_signal_selected(self):
