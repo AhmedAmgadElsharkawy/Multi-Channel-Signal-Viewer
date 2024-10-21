@@ -658,15 +658,17 @@ class RadarWidget(QWidget):
                 self.drawn_points.append(point)
 
         # Limit the number of points to avoid clutter
-        while len(self.drawn_points) > self.data_size * 0.5:
-            if len(self.drawn_points) > self.data_size * 0.5:
+        while len(self.drawn_points) > self.data_size * 0.3:
+            if len(self.drawn_points) > self.data_size * 0.3:
                 self.drawn_points.pop(0)  # Remove the oldest point
 
         # Draw points along the radar line
-        for point in self.drawn_points:
-            painter.setPen(Qt.PenStyle.NoPen)  
-            painter.setBrush(QColor("#00FF00"))
-            painter.drawEllipse(int(point[0] - 3), int(point[1] - 3), 6, 6)
+        if len(self.drawn_points) > 1:
+            painter.setPen(QColor("#00FF00"))  # Set pen color for the lines
+            for i in range(1, len(self.drawn_points)):
+                prev_point = self.drawn_points[i - 1]
+                curr_point = self.drawn_points[i]
+                painter.drawLine(int(prev_point[0]), int(prev_point[1]), int(curr_point[0]), int(curr_point[1]))
 
         if len(self.points) == 0:
             self.timer.stop()
