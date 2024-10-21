@@ -272,9 +272,6 @@ class RectangleGraph(QWidget):
         signal = Signal(file_path,len(self.signals))
         if len(signal.x) > self.xLimit:
             self.xLimit = len(signal.x)
-        for point in signal.y:
-            self.yMinLimit = min(self.yMinLimit, point)
-            self.yMaxLimit = max(self.yMaxLimit, point)
         signal.color = self.colors[len(self.signals)%len(self.colors)]
         self.signals.append(signal)
         self.timer.stop()
@@ -301,10 +298,15 @@ class RectangleGraph(QWidget):
                 if self.signals[i].show:
                     if len(self.signals[i].x) >= self.ptr:
                         curve.setData(self.signals[i].x[:self.ptr], self.signals[i].y[:self.ptr])  # Update each curve
+                        if self.ptr < len(self.signals[i].x):
+                            self.yMinLimit = min(self.yMinLimit, self.signals[i].y[self.ptr])
+                            self.yMaxLimit = max(self.yMaxLimit, self.signals[i].y[self.ptr])
+                        self.rectangle_plot.setLimits(yMin = self.yMinLimit, yMax = self.yMaxLimit)
                         if self.ptr / 1000 > 1:
                             self.rectangle_plot.setLimits(xMin=0, xMax=((self.ptr / 1000)))
             self.ptr += 1
             self.rectangle_plot.setXRange((self.ptr / 1000), (self.ptr / 1000))
+            self.rectangle_plot.setYRange(self.yMinLimit, self.yMaxLimit)
 
     def browse_file(self):
         file_dialog = QFileDialog(self)
@@ -351,12 +353,15 @@ class RectangleGraph(QWidget):
     def rewindSignals(self):
         self.timer.stop()
         self.ptr = 0
+        self.yMinLimit = 0
+        self.yMaxLimit = 0
         self.signalSpeed = 20
         self.rectangle_plot.setXRange(0, 1)  # Initial range
         self.rectangle_plot.setYRange(self.yMinLimit, self.yMaxLimit)
         self.rectangle_plot.setLimits(xMin=0, xMax=1)
         self.isRunning = True
-        self.timer.start(20)
+        self.timer.start(self.signalSpeed)
+        
     def on_signal_selected(self):
         signal_index = self.signals_combobox.currentIndex()
         if(signal_index < 0): 
@@ -409,9 +414,10 @@ class RectangleGraph(QWidget):
             if max_ptr >= 0:
                 self.ptr = max_ptr
                 self.rectangle_plot.setXRange((self.ptr / 1000) - 1.1, self.ptr / 1000)
+                self.rectangle_plot.setLimits(xMin = 0, xMax = self.ptr / 1000)
             self.timer.stop()
         else:
-            self.timer.start()
+            self.timer.start(self.signalSpeed)
             
     def change_label(self):
         new_label = self.label_input_field.text()
