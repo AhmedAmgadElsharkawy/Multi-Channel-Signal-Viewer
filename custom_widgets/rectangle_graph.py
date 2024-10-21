@@ -407,9 +407,17 @@ class RectangleGraph(QWidget):
 
     def check_signals_states(self):
         max_ptr = -10
+        miny = 1000
+        maxy = -1000
         for signal in self.signals:
             if signal.show:
                 max_ptr = max(max_ptr,len(signal.x))
+                miny = min(miny, min(signal.y))
+                maxy = max(maxy, max(signal.y))
+        self.yMinLimit = miny
+        self.yMaxLimit = maxy
+        self.rectangle_plot.setLimits(yMin = self.yMinLimit, yMax = self.yMaxLimit)
+        self.rectangle_plot.setYRange(self.yMinLimit, self.yMaxLimit)
         if max_ptr < self.ptr:
             if max_ptr >= 0:
                 self.ptr = max_ptr
