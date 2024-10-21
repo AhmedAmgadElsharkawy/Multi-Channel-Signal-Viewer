@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget,QHBoxLayout,QVBoxLayout,QPushButton,QRadioButton,QButtonGroup,QLabel
+from PyQt6.QtWidgets import QWidget,QHBoxLayout,QVBoxLayout,QPushButton,QRadioButton,QButtonGroup,QLabel,QComboBox
 from PyQt6.QtGui import QIcon, QPixmap
 import pyqtgraph as pg
 from PyQt6.QtCore import QTimer
@@ -14,6 +14,11 @@ from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Table, TableStyle
 from reportlab.pdfgen import canvas
 import os
+
+from scipy.interpolate import interp1d, splrep, splev, BarycentricInterpolator
+from numpy.polynomial import Polynomial
+import math
+
 
 
 def fetch_live_signal_async(callback):
@@ -56,6 +61,7 @@ class GlueAndLiveGraph(QWidget):
         self.full_time_data = []   
         self.index = 0             
         self.window_size = 100      
+        self.signals_overlap = False
         self.initUI()
 
         self.timer.start(self.fetching_rate)
@@ -108,10 +114,31 @@ class GlueAndLiveGraph(QWidget):
         self.pause_button = QPushButton()
         self.play_button.setIcon(play_icon)
         self.pause_button.setIcon(pause_icon)
+        self.interpolation_order_combobox = QComboBox()
+        self.interpolation_orders = [
+            "Nearest",
+            "Linear",
+            "Polynomial",
+            "Cubic",
+            # "Barycentric"
+        ]
+        self.interpolation_order_combobox.setFixedWidth(77)
+        self.interpolation_order_combobox.addItems(self.interpolation_orders)
+        self.interpolation_order_combobox.setVisible(False)
+        self.interpolation_order_combobox.currentIndexChanged.connect(self.interpolate_cropped_signals)
+        self.lock_button = QPushButton("Lock")
+        self.unlock_button = QPushButton("Unlock")
+        self.lock_button.clicked.connect(self.interpolate_cropped_signals)
+        self.unlock_button.clicked.connect(self.unlock_cropped_signals)
+        self.unlock_button.setVisible(False)
+        self.lock_button.setVisible(False)
         self.export_button = QPushButton()
         self.export_button.setIcon(export_icon)
         self.graph_controls_buttons_layout.addWidget(self.play_button)
         self.graph_controls_buttons_layout.addWidget(self.pause_button)
+        self.graph_controls_buttons_layout.addWidget(self.interpolation_order_combobox)
+        self.graph_controls_buttons_layout.addWidget(self.lock_button)
+        self.graph_controls_buttons_layout.addWidget(self.unlock_button)
         self.graph_controls_buttons_layout.addWidget(self.export_button)
         self.controls_widget_layout.addLayout(self.graph_controls_buttons_layout)
         self.pause_button.clicked.connect(self.pause_signal)
@@ -134,7 +161,8 @@ class GlueAndLiveGraph(QWidget):
         self.glue_and_live_plot.scene().sigMouseClicked.connect(self.on_manual_interaction)
         self.glue_and_live_plot.sigRangeChanged.connect(self.on_range_change)
         self.live_radio_button.setChecked(True)
-        
+
+
         self.setLayout(main_layout)
 
         self.setStyleSheet("""
@@ -193,6 +221,12 @@ class GlueAndLiveGraph(QWidget):
         
 
     def plot_cropped_signals(self,x1,y1,x2,y2,color1,color2):
+         self.lock_button.setVisible(True)
+         self.interpolation_order_combobox.setVisible(False)
+         self.unlock_button.setVisible(False)
+         self.play_button.setVisible(False)
+         self.pause_button.setVisible(False)
+         self.export_button.setVisible(False)
          self.pause_signal()
          self.cropped_signal_curve1.setData(x1,y1)   
          self.cropped_signal_curve2.setData(x2,y2)
@@ -234,9 +268,9 @@ class GlueAndLiveGraph(QWidget):
         self.glue_and_live_plot.addItem(self.glue_output_curve)
         if (self.glue_output_curve.getData()[0]) is not None:
             self.glue_and_live_plot.setXRange(self.glue_output_curve.getData()[0][0],self.glue_output_curve.getData()[0][-1])
-            self.glue_and_live_plot.setLimits(xMin = max(0,self.glue_output_curve.getData()[0][0] - 0.5),xMax = self.glue_output_curve.getData()[0][-1] + 0.5)
-            self.glue_and_live_plot.setYRange(-2,2)
-            self.glue_and_live_plot.setLimits(yMin = -3,yMax = 3)
+            self.glue_and_live_plot.setLimits(xMin = max(0,self.glue_output_curve.getData()[0][0]),xMax = self.glue_output_curve.getData()[0][-1])
+            self.glue_and_live_plot.setYRange(min(self.glue_output_curve.getData()[1]),max(self.glue_output_curve.getData()[1]))
+            self.glue_and_live_plot.setLimits(yMin = min(self.glue_output_curve.getData()[1]),yMax = max(self.glue_output_curve.getData()[1]))
         else:
             self.glue_and_live_plot.setXRange(0,1)
             self.glue_and_live_plot.setLimits(xMin = 0,xMax = 1)
@@ -259,14 +293,8 @@ class GlueAndLiveGraph(QWidget):
         else:
             self.glue_and_live_plot.setLimits(xMin = 0,xMax = self.window_size,yMin = -2,yMax= 2)
             self.glue_and_live_plot.setYRange(-1,1)
-            self.glue_and_live_plot.setXRange(0,self.window_size)
-
-
-
-
-                
+            self.glue_and_live_plot.setXRange(0,self.window_size)   
         self.glue_and_live_plot.setLimits(xMin=0)
-
         self.play_signal()
         self.enable_controls()
 
@@ -285,22 +313,142 @@ class GlueAndLiveGraph(QWidget):
     def disable_controls(self):
          self.live_radio_button.setEnabled(False)
          self.glue_radio_button.setEnabled(False)
-         self.play_button.setEnabled(False)
-         self.pause_button.setEnabled(False)
-         self.export_button.setEnabled(False)
 
     def enable_controls(self):
          self.live_radio_button.setEnabled(True)
          self.glue_radio_button.setEnabled(True)
          if self.live_radio_button.isChecked():
-            self.play_button.setEnabled(True)
-            self.pause_button.setEnabled(True)
-            self.export_button.setEnabled(False)
+            self.export_button.setVisible(False)
+            self.interpolation_order_combobox.setVisible(False)
+            self.unlock_button.setVisible(False)
+            self.lock_button.setVisible(False)
+            self.play_button.setVisible(True)
+            self.pause_button.setVisible(True)
          else:
-             self.play_button.setEnabled(False)
-             self.pause_button.setEnabled(False)
-             self.export_button.setEnabled(True)
+             self.lock_button.setVisible(False)
+             self.play_button.setVisible(False)
+             self.pause_button.setVisible(False)            
+             if(self.glue_output_curve.getData()[0] is not None):
+                self.export_button.setVisible(True)   
+                self.unlock_button.setVisible(True)
+                if(not self.signals_overlap):
+                    self.interpolation_order_combobox.setVisible(True)
+
+    def interpolate_cropped_signals(self):
+        interpolate_order = self.interpolation_orders[self.interpolation_order_combobox.currentIndex()]
+        self.cropped_signal1_data = self.cropped_signal_curve1.getData()
+        self.cropped_signal2_data = self.cropped_signal_curve2.getData()
+
+        signal1_x = np.array(self.cropped_signal1_data[0])
+        signal1_y = np.array(self.cropped_signal1_data[1])
+        signal2_x = np.array(self.cropped_signal2_data[0])
+        signal2_y = np.array(self.cropped_signal2_data[1])
+
+        gap1 = signal2_x[0] - signal1_x[-1]
+        gap2 = signal1_x[0] - signal2_x[-1]
+
+        if gap1 == 0:
+            self.signals_overlap = True
+            interpolate_x = np.concatenate([signal1_x, signal2_x])
+            interpolate_y = np.concatenate([signal1_y, signal2_y])
+        elif gap1 < 0 and gap2 < 0:
+            self.signals_overlap = True
+            intersection_start = max(signal1_x[0], signal2_x[0])
+            intersection_end = min(signal1_x[-1], signal2_x[-1])
+
+            intersection_mask1 = (np.ceil(signal1_x*1000)/1000 >= intersection_start) & (np.ceil(signal1_x*1000)/1000 <= intersection_end)
+            intersection_mask2 = (np.ceil(signal2_x*1000)/1000 >= intersection_start) & (np.ceil(signal2_x*1000)/1000 <= intersection_end)
+            
+            intersection_signal1_x = np.ceil(signal1_x[intersection_mask1]*1000)/1000
+            intersection_signal1_y = signal1_y[intersection_mask1]
+            intersection_signal2_x = np.ceil(signal2_x[intersection_mask2]*1000)/1000
+            intersection_signal2_y = signal2_y[intersection_mask2]
+
+            unique_signal1_x = np.setdiff1d(intersection_signal1_x, intersection_signal2_x)
+            unique_signal2_x = np.setdiff1d(intersection_signal2_x, intersection_signal1_x)
+
+            unique_signal1_y = intersection_signal1_y[np.isin(intersection_signal1_x, unique_signal1_x)]
+            unique_signal2_y = intersection_signal2_y[np.isin(intersection_signal2_x, unique_signal2_x)]
+
+            common_x = np.intersect1d(intersection_signal1_x, intersection_signal2_x)
+
+            sum_y_values = []
+            for x in common_x:
+                y1 = intersection_signal1_y[intersection_signal1_x == x][0]
+                y2 = intersection_signal2_y[intersection_signal2_x == x][0]
+                sum_y = (y1 + y2)/2
+                sum_y_values.append([x, sum_y])
+
+            interpolate_x = np.array([pair[0] for pair in sum_y_values])
+            interpolate_y = np.array([pair[1] for pair in sum_y_values])
+
+            signal1_outside_mask = (signal1_x < intersection_start) | (signal1_x > intersection_end)
+            interpolate_x = np.concatenate([interpolate_x, signal1_x[signal1_outside_mask], unique_signal1_x])
+            interpolate_y = np.concatenate([interpolate_y, signal1_y[signal1_outside_mask], unique_signal1_y])
+
+            signal2_outside_mask = (signal2_x < intersection_start) | (signal2_x > intersection_end)
+            interpolate_x = np.concatenate([interpolate_x, signal2_x[signal2_outside_mask], unique_signal2_x])
+            interpolate_y = np.concatenate([interpolate_y, signal2_y[signal2_outside_mask], unique_signal2_y])
+
+            sorted_indices = np.argsort(interpolate_x)
+            interpolate_x = interpolate_x[sorted_indices]
+            interpolate_y = interpolate_y[sorted_indices]
+        else:
+            self.signals_overlap = False
+            if gap1 > 0:
+                combined_x = np.concatenate([signal1_x, signal2_x])
+                combined_y = np.concatenate([signal1_y, signal2_y])
+                gap_x = np.linspace(signal1_x[-1], signal2_x[0], num=math.ceil(gap1*1000))  
+            else:
+                combined_x = np.concatenate([signal2_x, signal1_x])
+                combined_y = np.concatenate([signal2_y, signal1_y])
+                gap_x = np.linspace(signal2_x[-1], signal1_x[0], num=math.ceil(gap2*1000))  
+
+                
+
+            if interpolate_order == 'Linear':
+                f = interp1d(combined_x, combined_y, kind='linear', fill_value="extrapolate")
+            elif interpolate_order == 'Cubic':
+                f = interp1d(combined_x, combined_y, kind='cubic', fill_value="extrapolate")
+            # elif interpolate_order == 'Barycentric':
+            #     f = BarycentricInterpolator(combined_x, combined_y)
+            elif interpolate_order == 'Nearest':
+                f = interp1d(combined_x, combined_y, kind='nearest', fill_value="extrapolate")
+            elif interpolate_order == 'Polynomial':
+                degree = min(len(combined_x) - 1, 3) 
+                coefficients = Polynomial.fit(combined_x, combined_y, degree)
+                f = lambda x: coefficients(x)
+            gap_y = f(gap_x)
+            if(gap1>0):
+                interpolate_x = np.concatenate([signal1_x, gap_x, signal2_x])
+                interpolate_y = np.concatenate([signal1_y, gap_y, signal2_y])
+            else:
+                interpolate_x = np.concatenate([signal2_x, gap_x, signal1_x])
+                interpolate_y = np.concatenate([signal2_y, gap_y, signal1_y])
+            
+
+        self.glue_and_live_plot.clear()
+        self.glue_output_curve.setData(interpolate_x, interpolate_y)
+        self.glue_radio_button.blockSignals(True)
+        self.glue_radio_button.setChecked(True)
+        self.glue_radio_button.blockSignals(False)
+        self.open_glue_signal()
              
+
+    def unlock_cropped_signals(self):
+        x1 = self.cropped_signal_curve1.getData()[0]
+        y1 = self.cropped_signal_curve1.getData()[1]
+        x2 = self.cropped_signal_curve2.getData()[0]
+        y2 = self.cropped_signal_curve2.getData()[1]
+        pen1 = self.cropped_signal_curve1.opts['pen']
+        pen2 = self.cropped_signal_curve2.opts['pen']
+        color1 = pen1.color().name()
+        color2 = pen2.color().name()
+        self.plot_cropped_signals(x1,y1,x2,y2,color1,color2)
+        self.disable_controls()
+        self.lock_button.setVisible(True)
+
+
 
     def export_pdf(self):
         # Export graph as image
