@@ -107,16 +107,29 @@ class MainWindow(QMainWindow):
         glue_widget_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.link_h_box.addWidget(glue_widget)
         self.glue_button = QPushButton("Glue")
+        self.interpolation_order_combobox = QComboBox()
+        self.interpolation_orders = [
+            "Nearest Neighbour",
+            "Linear",
+            "Polynomial",
+            "Cubic",
+            # "Barycentric"
+        ]
+        self.interpolation_order_combobox.addItems(self.interpolation_orders)
+        self.interpolation_order_combobox.setObjectName("interpolation-order-combobox")
         glue_widget_layout.addWidget(self.glue_button)
-        self.crop_signals_button = QPushButton("Crop")
+        glue_widget_layout.addWidget(self.interpolation_order_combobox)
         self.cancel_glue_button = QPushButton("Cancel")
-        glue_widget_layout.addWidget(self.crop_signals_button)
+        self.confirm_glue_button = QPushButton("confirm")
+        glue_widget_layout.addWidget(self.confirm_glue_button)
         glue_widget_layout.addWidget(self.cancel_glue_button)
+        self.confirm_glue_button.clicked.connect(self.confirm_glue)
+        glue_widget.setFixedHeight(50)
         self.cancel_glue_button.hide()
-        self.crop_signals_button.hide()
+        self.confirm_glue_button.hide()
+        self.interpolation_order_combobox.hide()
         self.cancel_glue_button.clicked.connect(self.cancel_signals_glue)
         self.glue_button.clicked.connect(self.start_signals_glue)
-        self.crop_signals_button.clicked.connect(self.crop_signals)
         self.glue_button.setEnabled(False)
         self.rectangle_plot1.signals_combobox.currentIndexChanged.connect(self.update_glue_button)
         self.rectangle_plot2.signals_combobox.currentIndexChanged.connect(self.update_glue_button)
@@ -179,6 +192,9 @@ class MainWindow(QMainWindow):
         bottom_widget_layout.addLayout(self.radar_box)
 
 
+        self.interpolation_order_combobox.currentIndexChanged.connect(self.update_glue_output)
+
+
 
 
         # set main layout of central widget
@@ -213,8 +229,13 @@ class MainWindow(QMainWindow):
             }
            
             #interpolation-order-combobox{
-                padding:3px 7px           
+                padding:2px 7px;
+                margin:0px;           
                 }
+            #interpolation-order-combobox:disabled{
+                background-color:gray;
+                color:white;
+            }
         """)
 
     def start_signals_glue(self):
@@ -231,37 +252,59 @@ class MainWindow(QMainWindow):
         self.rectangle_plot1.linear_region_item.setRegion([rectangle_plot1_xRange[0],linear_region_item1_end])
         self.rectangle_plot2.linear_region_item.setRegion([rectangle_plot2_xRange[0],linear_region_item2_end])
         self.glue_button.hide()
-        self.crop_signals_button.show()
+        self.interpolation_order_combobox.show()
         self.cancel_glue_button.show()
+        self.confirm_glue_button.show()
         signal1_index = self.rectangle_plot1.signals_combobox.currentIndex()
         signal2_index = self.rectangle_plot2.signals_combobox.currentIndex()
+        # self.rectangle_plot1.rectangle_plot.clear()
+        # self.rectangle_plot1.rectangle_plot.addItem(self.rectangle_plot1.curves[signal1_index])
+        # self.rectangle_plot2.rectangle_plot.clear()
+        # self.rectangle_plot2.rectangle_plot.addItem(self.rectangle_plot2.curves[signal2_index])
+
         for i,curve in enumerate(self.rectangle_plot1.curves):
             if i == signal1_index:
                 continue
             self.rectangle_plot1.rectangle_plot.removeItem(curve)
-
         for i,curve in enumerate(self.rectangle_plot2.curves):
             if i == signal2_index:
                 continue
             self.rectangle_plot2.rectangle_plot.removeItem(curve)
+
+        self.update_glue_output()
+        self.rectangle_plot1.linear_region_item.sigRegionChanged.connect(self.update_glue_output)
+        self.rectangle_plot2.linear_region_item.sigRegionChanged.connect(self.update_glue_output)
+
+        self.glue_and_live_graph.open_glue_signal()
         self.rectangle_plot1.disable_controls_buttons()
         self.rectangle_plot1.disable_props()
         self.rectangle_plot2.disable_controls_buttons()
         self.rectangle_plot2.disable_props()
-        # self.glue_and_live_graph.disable_controls()
+        self.glue_and_live_graph.disable_controls()
 
-
+    def update_glue_output(self):
+        self.extract_selected_regions()
+        self.glue_and_live_graph.interpolate_selected_regions(self.interpolation_orders[self.interpolation_order_combobox.currentIndex()])
+        self.glue_and_live_graph.disable_controls()
+        if(self.glue_and_live_graph.signals_overlap):
+            self.interpolation_order_combobox.setEnabled(False)
+        else:
+            self.interpolation_order_combobox.setEnabled(True)
 
     def cancel_signals_glue(self):
+        self.glue_and_live_graph.glue_and_live_plot.removeItem(self.glue_and_live_graph.glue_output_curve)
+        self.glue_and_live_graph.glue_output_curve.setData(x = self.glue_and_live_graph.previous_glue_output_curve.getData()[0],y = self.glue_and_live_graph.previous_glue_output_curve.getData()[1])
+        self.glue_and_live_graph.open_glue_signal()
+        self.rectangle_plot1.linear_region_item.sigRegionChanged.disconnect(self.update_glue_output)
+        self.rectangle_plot2.linear_region_item.sigRegionChanged.disconnect(self.update_glue_output)
         self.rectangle_plot1.linear_region_item.setVisible(False)
         self.rectangle_plot2.linear_region_item.setVisible(False)
         self.rectangle_plot1.playSignals()
         self.rectangle_plot2.playSignals()
         self.glue_button.show()
-        # self.choose_glue_signal1.hide()
-        # self.choose_glue_signal2.hide()
         self.cancel_glue_button.hide()
-        self.crop_signals_button.hide()
+        self.interpolation_order_combobox.hide()
+        self.confirm_glue_button.hide()
 
         signal1_index = self.rectangle_plot1.signals_combobox.currentIndex()
         signal2_index = self.rectangle_plot2.signals_combobox.currentIndex()
@@ -280,9 +323,10 @@ class MainWindow(QMainWindow):
         self.rectangle_plot1.enable_props()
         self.rectangle_plot2.enable_controls_buttons()
         self.rectangle_plot2.enable_props()
+        self.glue_and_live_graph.enable_controls()
 
 
-    def crop_signals(self):
+    def extract_selected_regions(self):
         signal_region1 = self.rectangle_plot1.linear_region_item.getRegion()
         signal_region2 = self.rectangle_plot2.linear_region_item.getRegion()
 
@@ -314,10 +358,8 @@ class MainWindow(QMainWindow):
         new_x2 = np.array(new_x2)
         new_y2 = np.array(new_y2)
 
-        self.cancel_signals_glue()
-        self.glue_and_live_graph.plot_cropped_signals(new_x1,new_y1,new_x2,new_y2,signal1.color,signal2.color)
-        self.glue_and_live_graph.disable_controls()
-        self.glue_button.setVisible(True)
+        self.glue_and_live_graph.selected_region1_curve.setData(new_x1,new_y1)   
+        self.glue_and_live_graph.selected_region2_curve.setData(new_x2,new_y2)
         
 
         
@@ -333,7 +375,37 @@ class MainWindow(QMainWindow):
 
         
 
+    def confirm_glue(self):
+        self.glue_and_live_graph.previous_glue_output_curve.setData(x = self.glue_and_live_graph.glue_output_curve.getData()[0],y = self.glue_and_live_graph.glue_output_curve.getData()[1])
+        self.rectangle_plot1.playSignals()
+        self.rectangle_plot2.playSignals()
+        self.glue_button.show()
+        self.cancel_glue_button.hide()
+        self.interpolation_order_combobox.hide()
+        self.confirm_glue_button.hide()
 
+        self.rectangle_plot1.linear_region_item.sigRegionChanged.disconnect(self.update_glue_output)
+        self.rectangle_plot2.linear_region_item.sigRegionChanged.disconnect(self.update_glue_output)
+        self.rectangle_plot1.linear_region_item.setVisible(False)
+        self.rectangle_plot2.linear_region_item.setVisible(False)
+        signal1_index = self.rectangle_plot1.signals_combobox.currentIndex()
+        signal2_index = self.rectangle_plot2.signals_combobox.currentIndex()
+
+        for i,curve in enumerate(self.rectangle_plot1.curves):
+            if i == signal1_index:
+                continue
+            self.rectangle_plot1.rectangle_plot.addItem(curve)
+            
+        for i,curve in enumerate(self.rectangle_plot2.curves):
+            if i == signal2_index:
+                continue
+            self.rectangle_plot2.rectangle_plot.addItem(curve)
+        self.rectangle_plot1.enable_controls_buttons()
+        self.rectangle_plot1.enable_props()
+        self.rectangle_plot2.enable_controls_buttons()
+        self.rectangle_plot2.enable_props()
+        self.glue_and_live_graph.enable_controls()
+    
 
     def link_button_changed(self):
         sender = self.sender()
@@ -566,8 +638,6 @@ class RadarWidget(QWidget):
             min_amp = min(min_amp, file_data.iloc[i, 1])
             max_amp = max(max_amp, file_data.iloc[i, 1])
 
-        # print(min_time, max_time)
-        # print(min_amp, max_amp)
 
         for i in range(1, data_size):
             if unique_data.get(file_data.iloc[i, 1]) is None:

@@ -114,31 +114,10 @@ class GlueAndLiveGraph(QWidget):
         self.pause_button = QPushButton()
         self.play_button.setIcon(play_icon)
         self.pause_button.setIcon(pause_icon)
-        self.interpolation_order_combobox = QComboBox()
-        self.interpolation_orders = [
-            "Nearest",
-            "Linear",
-            "Polynomial",
-            "Cubic",
-            # "Barycentric"
-        ]
-        self.interpolation_order_combobox.setFixedWidth(77)
-        self.interpolation_order_combobox.addItems(self.interpolation_orders)
-        self.interpolation_order_combobox.setVisible(False)
-        self.interpolation_order_combobox.currentIndexChanged.connect(self.interpolate_cropped_signals)
-        self.lock_button = QPushButton("Lock")
-        self.unlock_button = QPushButton("Unlock")
-        self.lock_button.clicked.connect(self.interpolate_cropped_signals)
-        self.unlock_button.clicked.connect(self.unlock_cropped_signals)
-        self.unlock_button.setVisible(False)
-        self.lock_button.setVisible(False)
         self.export_button = QPushButton()
         self.export_button.setIcon(export_icon)
         self.graph_controls_buttons_layout.addWidget(self.play_button)
         self.graph_controls_buttons_layout.addWidget(self.pause_button)
-        self.graph_controls_buttons_layout.addWidget(self.interpolation_order_combobox)
-        self.graph_controls_buttons_layout.addWidget(self.lock_button)
-        self.graph_controls_buttons_layout.addWidget(self.unlock_button)
         self.graph_controls_buttons_layout.addWidget(self.export_button)
         self.controls_widget_layout.addLayout(self.graph_controls_buttons_layout)
         self.pause_button.clicked.connect(self.pause_signal)
@@ -146,14 +125,15 @@ class GlueAndLiveGraph(QWidget):
         self.export_button.clicked.connect(self.export_pdf)
 
 
-        self.cropped_signal_curve1 = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#ff0000"))
-        self.cropped_signal_curve2 = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))  
-        self.glue_output_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))  
+        self.selected_region1_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#ff0000"))
+        self.selected_region2_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))  
+        self.glue_output_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00")) 
+        self.previous_glue_output_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))
         self.linear_region1 = pg.LinearRegionItem()  
         self.linear_region2 = pg.LinearRegionItem() 
 
-        self.glue_and_live_plot.removeItem(self.cropped_signal_curve1)
-        self.glue_and_live_plot.removeItem(self.cropped_signal_curve2)
+        self.glue_and_live_plot.removeItem(self.selected_region1_curve)
+        self.glue_and_live_plot.removeItem(self.selected_region2_curve)
         self.glue_and_live_plot.removeItem(self.glue_output_curve)
 
 
@@ -221,25 +201,22 @@ class GlueAndLiveGraph(QWidget):
         
 
     def plot_cropped_signals(self,x1,y1,x2,y2,color1,color2):
-         self.lock_button.setVisible(True)
-         self.interpolation_order_combobox.setVisible(False)
-         self.unlock_button.setVisible(False)
          self.play_button.setVisible(False)
          self.pause_button.setVisible(False)
          self.export_button.setVisible(False)
          self.pause_signal()
-         self.cropped_signal_curve1.setData(x1,y1)   
-         self.cropped_signal_curve2.setData(x2,y2)
-         self.cropped_signal_curve1.setPen(pg.mkPen(color=color1))
-         self.cropped_signal_curve2.setPen(pg.mkPen(color=color2))
+         self.selected_region1_curve.setData(x1,y1)   
+         self.selected_region2_curve.setData(x2,y2)
+         self.selected_region1_curve.setPen(pg.mkPen(color=color1))
+         self.selected_region2_curve.setPen(pg.mkPen(color=color2))
          self.fixed_width1 = x1[-1] - x1[0]
          self.fixed_width2 = x2[-1] - x2[0]
          self.linear_region1.setRegion([x1[0], x1[-1]])  
          self.linear_region2.setRegion([x2[0], x2[-1]])  
 
          self.glue_and_live_plot.clear()
-         self.glue_and_live_plot.addItem(self.cropped_signal_curve1)
-         self.glue_and_live_plot.addItem(self.cropped_signal_curve2)
+         self.glue_and_live_plot.addItem(self.selected_region1_curve)
+         self.glue_and_live_plot.addItem(self.selected_region2_curve)
 
          self.glue_and_live_plot.addItem(self.linear_region1)
          self.glue_and_live_plot.addItem(self.linear_region2)
@@ -267,15 +244,15 @@ class GlueAndLiveGraph(QWidget):
         self.glue_and_live_plot.removeItem(self.glue_output_curve)
         self.glue_and_live_plot.addItem(self.glue_output_curve)
         if (self.glue_output_curve.getData()[0]) is not None:
-            self.glue_and_live_plot.setXRange(self.glue_output_curve.getData()[0][0],self.glue_output_curve.getData()[0][-1])
             self.glue_and_live_plot.setLimits(xMin = max(0,self.glue_output_curve.getData()[0][0]),xMax = self.glue_output_curve.getData()[0][-1])
-            self.glue_and_live_plot.setYRange(min(self.glue_output_curve.getData()[1]),max(self.glue_output_curve.getData()[1]))
             self.glue_and_live_plot.setLimits(yMin = min(self.glue_output_curve.getData()[1]),yMax = max(self.glue_output_curve.getData()[1]))
+            self.glue_and_live_plot.setXRange(self.glue_output_curve.getData()[0][0],self.glue_output_curve.getData()[0][-1])
+            self.glue_and_live_plot.setYRange(min(self.glue_output_curve.getData()[1]),max(self.glue_output_curve.getData()[1]))
         else:
-            self.glue_and_live_plot.setXRange(0,1)
             self.glue_and_live_plot.setLimits(xMin = 0,xMax = 1)
-            self.glue_and_live_plot.setYRange(-1,1)
             self.glue_and_live_plot.setLimits(yMin = -2,yMax = 2)
+            self.glue_and_live_plot.setXRange(0,1)
+            self.glue_and_live_plot.setYRange(-1,1)
         self.enable_controls()
 
     def run_live_signal(self):
@@ -302,42 +279,38 @@ class GlueAndLiveGraph(QWidget):
     def align_cropped_singals(self):
          self.linear_region1.setRegion([self.linear_region1.getRegion()[0], self.linear_region1.getRegion()[0] + self.fixed_width1])
          self.linear_region2.setRegion([self.linear_region2.getRegion()[0], self.linear_region2.getRegion()[0] + self.fixed_width2])
-         cropped_signal1_shift = self.linear_region1.getRegion()[0] - self.cropped_signal_curve1.getData()[0][0]
-         cropped_signal2_shift = self.linear_region2.getRegion()[0] - self.cropped_signal_curve2.getData()[0][0]
-         new_x1 = self.cropped_signal_curve1.getData()[0] + cropped_signal1_shift
-         new_x2 = self.cropped_signal_curve2.getData()[0] + cropped_signal2_shift
+         cropped_signal1_shift = self.linear_region1.getRegion()[0] - self.selected_region1_curve.getData()[0][0]
+         cropped_signal2_shift = self.linear_region2.getRegion()[0] - self.selected_region2_curve.getData()[0][0]
+         new_x1 = self.selected_region1_curve.getData()[0] + cropped_signal1_shift
+         new_x2 = self.selected_region2_curve.getData()[0] + cropped_signal2_shift
 
-         self.cropped_signal_curve1.setData(new_x1, self.cropped_signal_curve1.getData()[1])
-         self.cropped_signal_curve2.setData(new_x2, self.cropped_signal_curve2.getData()[1])
+         self.selected_region1_curve.setData(new_x1, self.selected_region1_curve.getData()[1])
+         self.selected_region2_curve.setData(new_x2, self.selected_region2_curve.getData()[1])
 
     def disable_controls(self):
          self.live_radio_button.setEnabled(False)
          self.glue_radio_button.setEnabled(False)
+         self.export_button.setEnabled(False)
 
     def enable_controls(self):
          self.live_radio_button.setEnabled(True)
          self.glue_radio_button.setEnabled(True)
          if self.live_radio_button.isChecked():
             self.export_button.setVisible(False)
-            self.interpolation_order_combobox.setVisible(False)
-            self.unlock_button.setVisible(False)
-            self.lock_button.setVisible(False)
             self.play_button.setVisible(True)
             self.pause_button.setVisible(True)
          else:
-             self.lock_button.setVisible(False)
              self.play_button.setVisible(False)
              self.pause_button.setVisible(False)            
+             self.export_button.setVisible(True)   
              if(self.glue_output_curve.getData()[0] is not None):
-                self.export_button.setVisible(True)   
-                self.unlock_button.setVisible(True)
-                if(not self.signals_overlap):
-                    self.interpolation_order_combobox.setVisible(True)
+                 self.export_button.setEnabled(True)
+             else:
+                 self.export_button.setEnabled(False)
 
-    def interpolate_cropped_signals(self):
-        interpolate_order = self.interpolation_orders[self.interpolation_order_combobox.currentIndex()]
-        self.cropped_signal1_data = self.cropped_signal_curve1.getData()
-        self.cropped_signal2_data = self.cropped_signal_curve2.getData()
+    def interpolate_selected_regions(self,interpolate_order):
+        self.cropped_signal1_data = self.selected_region1_curve.getData()
+        self.cropped_signal2_data = self.selected_region2_curve.getData()
 
         signal1_x = np.array(self.cropped_signal1_data[0])
         signal1_y = np.array(self.cropped_signal1_data[1])
@@ -412,7 +385,7 @@ class GlueAndLiveGraph(QWidget):
                 f = interp1d(combined_x, combined_y, kind='cubic', fill_value="extrapolate")
             # elif interpolate_order == 'Barycentric':
             #     f = BarycentricInterpolator(combined_x, combined_y)
-            elif interpolate_order == 'Nearest':
+            elif interpolate_order == 'Nearest Neighbour':
                 f = interp1d(combined_x, combined_y, kind='nearest', fill_value="extrapolate")
             elif interpolate_order == 'Polynomial':
                 degree = min(len(combined_x) - 1, 3) 
@@ -436,17 +409,16 @@ class GlueAndLiveGraph(QWidget):
              
 
     def unlock_cropped_signals(self):
-        x1 = self.cropped_signal_curve1.getData()[0]
-        y1 = self.cropped_signal_curve1.getData()[1]
-        x2 = self.cropped_signal_curve2.getData()[0]
-        y2 = self.cropped_signal_curve2.getData()[1]
-        pen1 = self.cropped_signal_curve1.opts['pen']
-        pen2 = self.cropped_signal_curve2.opts['pen']
+        x1 = self.selected_region1_curve.getData()[0]
+        y1 = self.selected_region1_curve.getData()[1]
+        x2 = self.selected_region2_curve.getData()[0]
+        y2 = self.selected_region2_curve.getData()[1]
+        pen1 = self.selected_region1_curve.opts['pen']
+        pen2 = self.selected_region2_curve.opts['pen']
         color1 = pen1.color().name()
         color2 = pen2.color().name()
         self.plot_cropped_signals(x1,y1,x2,y2,color1,color2)
         self.disable_controls()
-        self.lock_button.setVisible(True)
 
 
 
