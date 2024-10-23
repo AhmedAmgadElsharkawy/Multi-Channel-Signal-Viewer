@@ -129,8 +129,7 @@ class GlueAndLiveGraph(QWidget):
         self.selected_region2_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))  
         self.glue_output_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00")) 
         self.previous_glue_output_curve = self.glue_and_live_plot.plot(pen=pg.mkPen(color="#00ff00"))
-        self.linear_region1 = pg.LinearRegionItem()  
-        self.linear_region2 = pg.LinearRegionItem() 
+
 
         self.glue_and_live_plot.removeItem(self.selected_region1_curve)
         self.glue_and_live_plot.removeItem(self.selected_region2_curve)
@@ -200,43 +199,6 @@ class GlueAndLiveGraph(QWidget):
 
         
 
-    def plot_cropped_signals(self,x1,y1,x2,y2,color1,color2):
-         self.play_button.setVisible(False)
-         self.pause_button.setVisible(False)
-         self.export_button.setVisible(False)
-         self.pause_signal()
-         self.selected_region1_curve.setData(x1,y1)   
-         self.selected_region2_curve.setData(x2,y2)
-         self.selected_region1_curve.setPen(pg.mkPen(color=color1))
-         self.selected_region2_curve.setPen(pg.mkPen(color=color2))
-         self.fixed_width1 = x1[-1] - x1[0]
-         self.fixed_width2 = x2[-1] - x2[0]
-         self.linear_region1.setRegion([x1[0], x1[-1]])  
-         self.linear_region2.setRegion([x2[0], x2[-1]])  
-
-         self.glue_and_live_plot.clear()
-         self.glue_and_live_plot.addItem(self.selected_region1_curve)
-         self.glue_and_live_plot.addItem(self.selected_region2_curve)
-
-         self.glue_and_live_plot.addItem(self.linear_region1)
-         self.glue_and_live_plot.addItem(self.linear_region2)
-
-         self.linear_region1.lines[0].setMovable(False)
-         self.linear_region1.lines[1].setMovable(False)
-         self.linear_region2.lines[0].setMovable(False)
-         self.linear_region2.lines[1].setMovable(False)
-         self.linear_region1.sigRegionChanged.connect(self.align_cropped_singals)
-         self.linear_region2.sigRegionChanged.connect(self.align_cropped_singals)
-
-         max_xrange = max(x1[-1],x2[-1])
-         min_xrange = min(x1[0],x2[0])
-         
-
-         self.glue_and_live_plot.setLimits(xMin=0,xMax = None)
-         self.glue_and_live_plot.setLimits(yMin = -2 , yMax = 2)
-         self.glue_and_live_plot.setXRange(min_xrange,max_xrange)
-         self.glue_and_live_plot.setYRange(-1,1)
-
 
     def open_glue_signal(self):
         self.timer.stop()
@@ -276,16 +238,6 @@ class GlueAndLiveGraph(QWidget):
         self.enable_controls()
 
 
-    def align_cropped_singals(self):
-         self.linear_region1.setRegion([self.linear_region1.getRegion()[0], self.linear_region1.getRegion()[0] + self.fixed_width1])
-         self.linear_region2.setRegion([self.linear_region2.getRegion()[0], self.linear_region2.getRegion()[0] + self.fixed_width2])
-         cropped_signal1_shift = self.linear_region1.getRegion()[0] - self.selected_region1_curve.getData()[0][0]
-         cropped_signal2_shift = self.linear_region2.getRegion()[0] - self.selected_region2_curve.getData()[0][0]
-         new_x1 = self.selected_region1_curve.getData()[0] + cropped_signal1_shift
-         new_x2 = self.selected_region2_curve.getData()[0] + cropped_signal2_shift
-
-         self.selected_region1_curve.setData(new_x1, self.selected_region1_curve.getData()[1])
-         self.selected_region2_curve.setData(new_x2, self.selected_region2_curve.getData()[1])
 
     def disable_controls(self):
          self.live_radio_button.setEnabled(False)

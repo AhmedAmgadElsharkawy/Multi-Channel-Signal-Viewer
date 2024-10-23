@@ -2,7 +2,6 @@ import sys
 from PyQt6.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QHBoxLayout,QFileDialog,QGridLayout,QWidget,QLabel, QPushButton, QCheckBox, QMessageBox,QComboBox,QSizePolicy
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
-from custom_widgets.example import Example
 from custom_widgets.rectangle_graph import RectangleGraph
 from custom_widgets.glue_and_live_graph import GlueAndLiveGraph
 import numpy as np
@@ -32,11 +31,6 @@ class MainWindow(QMainWindow):
         main_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
 
-        # Here’s an example showing how to use custom widgets; feel free to uncomment it.
-        # example = Example()
-        # main_layout.addWidget(example)
-
-        # add your custom widgets below
         self.rectangle_plot1 = RectangleGraph()
         self.rectangle_plot2 = RectangleGraph()
         self.rectangle_plot1.move_button.setText("Move Down")
@@ -235,6 +229,12 @@ class MainWindow(QMainWindow):
             #interpolation-order-combobox:disabled{
                 background-color:gray;
                 color:white;
+            }
+            QComboBox{
+                background-color:#2d2d2d               
+            }
+            QComboBox QAbstractItemView {
+                background-color: #2d2d2d; 
             }
         """)
 

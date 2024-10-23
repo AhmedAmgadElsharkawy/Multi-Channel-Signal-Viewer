@@ -243,9 +243,9 @@ class RectangleGraph(QWidget):
                     color:white;
             } 
             QComboBox {
-                    background-color:white;
+                    background-color:white ;
                     color:black;
-                                                }    
+            }    
             QComboBox:disabled {
                 background-color: gray;
                 color: white;
