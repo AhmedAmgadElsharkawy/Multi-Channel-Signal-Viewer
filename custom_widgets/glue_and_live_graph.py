@@ -332,17 +332,23 @@ class GlueAndLiveGraph(QWidget):
             intersection_mask1 = (np.ceil(signal1_x*1000)/1000 >= intersection_start) & (np.ceil(signal1_x*1000)/1000 <= intersection_end)
             intersection_mask2 = (np.ceil(signal2_x*1000)/1000 >= intersection_start) & (np.ceil(signal2_x*1000)/1000 <= intersection_end)
             
+            #extract all x and y values of signal1 and signal2 that are inside the intersections region
             intersection_signal1_x = np.ceil(signal1_x[intersection_mask1]*1000)/1000
             intersection_signal1_y = signal1_y[intersection_mask1]
             intersection_signal2_x = np.ceil(signal2_x[intersection_mask2]*1000)/1000
             intersection_signal2_y = signal2_y[intersection_mask2]
 
+            #extract x values of signal1 that doesn't exist in signal2 at intersection region
             unique_signal1_x = np.setdiff1d(intersection_signal1_x, intersection_signal2_x)
+            #extract x values of signal2 that doesn't exist in signal1 at intersection region
             unique_signal2_x = np.setdiff1d(intersection_signal2_x, intersection_signal1_x)
 
+            #extract y values related to unique x values
+            #isin to avoid the weird values after ceiling
             unique_signal1_y = intersection_signal1_y[np.isin(intersection_signal1_x, unique_signal1_x)]
             unique_signal2_y = intersection_signal2_y[np.isin(intersection_signal2_x, unique_signal2_x)]
 
+            #common x values between two signals
             common_x = np.intersect1d(intersection_signal1_x, intersection_signal2_x)
 
             sum_y_values = []
@@ -407,18 +413,6 @@ class GlueAndLiveGraph(QWidget):
         self.glue_radio_button.blockSignals(False)
         self.open_glue_signal()
              
-
-    def unlock_cropped_signals(self):
-        x1 = self.selected_region1_curve.getData()[0]
-        y1 = self.selected_region1_curve.getData()[1]
-        x2 = self.selected_region2_curve.getData()[0]
-        y2 = self.selected_region2_curve.getData()[1]
-        pen1 = self.selected_region1_curve.opts['pen']
-        pen2 = self.selected_region2_curve.opts['pen']
-        color1 = pen1.color().name()
-        color2 = pen2.color().name()
-        self.plot_cropped_signals(x1,y1,x2,y2,color1,color2)
-        self.disable_controls()
 
 
 
