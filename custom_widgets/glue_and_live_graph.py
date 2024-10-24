@@ -55,6 +55,7 @@ class GlueAndLiveGraph(QWidget):
         self.signal_label = "Live Bitcoin Price Signal"
         self.show_signal = True
         self.auto_scroll_enabled = True  
+        self.snapshots_array = []
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_signal)
@@ -129,10 +130,12 @@ class GlueAndLiveGraph(QWidget):
         self.interpolation_order_combobox.currentIndexChanged.connect(self.interpolate_cropped_signals)
         self.lock_button = QPushButton("Lock")
         self.unlock_button = QPushButton("Unlock")
+        self.snapshot_button = QPushButton("Snapshot")
         self.lock_button.clicked.connect(self.interpolate_cropped_signals)
         self.unlock_button.clicked.connect(self.unlock_cropped_signals)
         self.unlock_button.setVisible(False)
         self.lock_button.setVisible(False)
+        self.snapshot_button.setVisible(False)
         self.export_button = QPushButton()
         self.export_button.setIcon(export_icon)
         self.graph_controls_buttons_layout.addWidget(self.play_button)
@@ -140,10 +143,12 @@ class GlueAndLiveGraph(QWidget):
         self.graph_controls_buttons_layout.addWidget(self.interpolation_order_combobox)
         self.graph_controls_buttons_layout.addWidget(self.lock_button)
         self.graph_controls_buttons_layout.addWidget(self.unlock_button)
+        self.graph_controls_buttons_layout.addWidget(self.snapshot_button)
         self.graph_controls_buttons_layout.addWidget(self.export_button)
         self.controls_widget_layout.addLayout(self.graph_controls_buttons_layout)
         self.pause_button.clicked.connect(self.pause_signal)
         self.play_button.clicked.connect(self.play_signal)
+        self.snapshot_button.clicked.connect(self.take_snapshot)
         self.export_button.clicked.connect(self.export_pdf)
 
 
@@ -330,7 +335,9 @@ class GlueAndLiveGraph(QWidget):
              self.play_button.setVisible(False)
              self.pause_button.setVisible(False)            
              if(self.glue_output_curve.getData()[0] is not None):
-                self.export_button.setVisible(True)   
+                self.export_button.setVisible(True)
+                self.snapshot_button.setVisible(True)
+
                 self.unlock_button.setVisible(True)
                 if(not self.signals_overlap):
                     self.interpolation_order_combobox.setVisible(True)
@@ -449,8 +456,50 @@ class GlueAndLiveGraph(QWidget):
         self.disable_controls()
         self.lock_button.setVisible(True)
 
+    def take_snapshot(self):
+        snapshot = exporters.ImageExporter(self.glue_and_live_plot.scene())        
+        snapshot.params.fileSuffix = 'png'
+        curr_image_num = str(len(self.snapshots_array) + 1)
+        snapshot_filename = "snapshot" + curr_image_num + ".png"
+        self.snapshots_array.append(snapshot_filename)
+        snapshot.export(snapshot_filename)
+
     def export_pdf(self):
-        self.main_app.export_pdf()
+        # Create a PDF
+        file_name = "report.pdf"
+        pdf = canvas.Canvas(file_name, pagesize=letter)
+        pdf.setFont("Helvetica", 24)
+
+        # Add header text
+        pdf.drawCentredString(320, 670, "Cairo University")
+        pdf.drawCentredString(320, 620, "Multi-Channel-Viewer Report")
+
+        majorLogoPath = './Images/logo-major.png'
+        collegeLogoPath = './Images/collegeLogo.jpg'
+        
+        major_logo = ImageReader(majorLogoPath)
+        college_logo = ImageReader(collegeLogoPath)
+          
+        # Add logos to the PDF
+        pdf.drawImage(major_logo, 10, 725, width=112, height=45)
+        pdf.drawImage(college_logo, 525, 705, width=70, height=70)
+
+        curr_img_pos = 360
+
+        for i in range(len(self.snapshots_array)):
+            if curr_img_pos < 100:
+                curr_img_pos = 500
+                pdf.showPage()
+            curr_img_file = Image.open(self.snapshots_array[i])
+            curr_img = ImageReader(curr_img_file)
+            pdf.drawImage(curr_img, 10, curr_img_pos, width=590, height=150)
+            os.remove(self.snapshots_array[i])
+            curr_img_pos -= 200
+
+        pdf.save()
+        self.snapshots_array.clear()
+
+
 
     def calculate_signal_statistics(self, signal):
         """Calculate mean, std, duration, min, and max values for the signal."""
@@ -465,5 +514,3 @@ class GlueAndLiveGraph(QWidget):
             "min": min_value,
             "max": max_value
         }
-        
-        
