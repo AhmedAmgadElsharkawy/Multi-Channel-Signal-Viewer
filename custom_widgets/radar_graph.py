@@ -37,6 +37,7 @@ class radar_graph(QMainWindow):
         
         self.is_paused = True
         self.current_frame = 0
+        self.radar_speed = 30
 
         self.sweep_window = sweep_window
 
@@ -63,7 +64,7 @@ class radar_graph(QMainWindow):
         self.is_paused = False
         if len(self.theta) > 0 and len(self.radius) > 0:
             self.anim = FuncAnimation(self.fig, self.update_plot, frames=np.arange(from_frame, len(self.theta)),
-                                      interval=10, repeat=False)
+                                      interval=self.radar_speed, repeat=False)
             self.canvas.draw()
         else:
             print("Error: Cannot start animation due to insufficient data.")
@@ -86,6 +87,18 @@ class radar_graph(QMainWindow):
             return
         self.is_paused = False
         print(self.current_frame)
+        self.start_animation(self.current_frame)
+
+    def increase_speed(self):
+        self.anim.event_source.stop()
+        if (self.radar_speed > 10):
+            self.radar_speed -= 10
+        self.start_animation(self.current_frame)
+
+    def decrease_speed(self):
+        self.anim.event_source.stop()
+        if (self.radar_speed < 60):
+            self.radar_speed += 10
         self.start_animation(self.current_frame)
 
     def clear_radar(self):
