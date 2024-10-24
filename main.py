@@ -14,6 +14,15 @@ import random
 from scipy.interpolate import interp1d, splrep, splev, BarycentricInterpolator
 from numpy.polynomial import Polynomial
 
+import pyqtgraph.exporters as exporters
+from PIL import Image
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import Table, TableStyle
+from reportlab.pdfgen import canvas
+import os
+
 import csv
 
 
@@ -169,7 +178,7 @@ class MainWindow(QMainWindow):
         self.radar_box.addWidget(self.radar)
         self.radar_box.addLayout(self.radar_buttons)
 
-        self.glue_and_live_graph = GlueAndLiveGraph()
+        self.glue_and_live_graph = GlueAndLiveGraph(self)
         bottom_widget_layout.addWidget(self.glue_and_live_graph)
         bottom_widget_layout.addLayout(self.radar_box)
 
@@ -448,6 +457,106 @@ class MainWindow(QMainWindow):
             self.radar_speed_down_button.setEnabled(False)
             self.radar_close_file_button.setEnabled(False)
             self.radar.clear_radar()
+
+    def export_pdf(self):
+        # Export graph as image
+        glue_scene = exporters.ImageExporter(self.glue_and_live_graph.glue_and_live_plot.scene())        
+        glue_scene.params.fileSuffix = 'png'
+        glue_scene_filename = "glue.png"
+        glue_scene.export(glue_scene_filename)
+
+        graph1_scene = exporters.ImageExporter(self.rectangle_plot1.rectangle_plot.scene())
+        graph1_scene.params.fileSuffix = 'png'
+        graph1_scene_filename = "graph1.png"
+        graph1_scene.export(graph1_scene_filename)
+
+        graph2_scene = exporters.ImageExporter(self.rectangle_plot2.rectangle_plot.scene())
+        graph2_scene.params.fileSuffix = 'png'
+        graph2_scene_filename = "graph2.png"
+        graph2_scene.export(graph2_scene_filename)
+
+        # Create a PDF
+        file_name = "report.pdf"
+        pdf = canvas.Canvas(file_name, pagesize=letter)
+        pdf.setFont("Helvetica", 24)
+
+        # Add header text
+        pdf.drawCentredString(320, 670, "Cairo University")
+        pdf.drawCentredString(320, 620, "Multi-Channel-Viewer Report")
+
+        majorLogoPath = './Images/logo-major.png'
+        collegeLogoPath = './Images/collegeLogo.jpg'
+        
+        major_logo = ImageReader(majorLogoPath)
+        college_logo = ImageReader(collegeLogoPath)
+          
+        # Add logos to the PDF
+        pdf.drawImage(major_logo, 10, 725, width=112, height=45)
+        pdf.drawImage(college_logo, 525, 705, width=70, height=70)
+
+        glue_img_name = Image.open(glue_scene_filename)
+        glue_img = ImageReader(glue_img_name) 
+
+        graph1_image_name = Image.open(graph1_scene_filename)
+        graph1_img = ImageReader(graph1_image_name)
+
+        graph2_image_name = Image.open(graph2_scene_filename)
+        graph2_img = ImageReader(graph2_image_name)
+        
+        pdf.setFont("Helvetica", 18)
+
+        pdf.drawCentredString(320, 520, "Graph 1")
+        pdf.drawImage(graph1_img, 10, 350, width=590, height=150) 
+        pdf.drawCentredString(320, 270, "Graph 2")
+        pdf.drawImage(graph2_img,10, 100, width=590, height=150)
+
+        pdf.showPage()
+        pdf.setFont("Helvetica", 18)
+
+        pdf.drawCentredString(320, 670, "Glue graph")
+        pdf.drawImage(glue_img, 10, 500, width=590, height=150)
+
+        signal_stats = self.glue_and_live_graph.calculate_signal_statistics(self.glue_and_live_graph.glue_output_curve.getData())
+
+        data = [['Statistic', 'Value']]
+        stats_items = list(signal_stats.items())
+
+        for i in range(0, len(stats_items)):
+            row = []
+            for j in range(1):
+                if i + j < len(stats_items):
+                    row.append(stats_items[i + j][0])
+                    row.append(str(stats_items[i + j][1]))
+                else:
+                    row.append('') 
+                    row.append('')
+            data.append(row)
+
+        col_widths = [200, 200]
+
+        pdf.drawCentredString(320, 320, "Statistics for the glue graph")
+
+        table = Table(data, colWidths=col_widths)
+
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12), 
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige), 
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        table.wrapOn(pdf, 400, 400)
+        table.drawOn(pdf, 120, 200) 
+
+        pdf.save()
+
+        os.remove(glue_scene_filename)
+        os.remove(graph1_scene_filename)
+        os.remove(graph2_scene_filename)
 
 def main():
     app = QApplication(sys.argv)
