@@ -5,6 +5,7 @@ from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 from custom_widgets.example import Example
 from custom_widgets.rectangle_graph import RectangleGraph
 from custom_widgets.glue_and_live_graph import GlueAndLiveGraph
+from custom_widgets.radar_graph import radar_graph
 import numpy as np
 import pyqtgraph as pg
 import pandas as pd
@@ -126,7 +127,7 @@ class MainWindow(QMainWindow):
         bottom_widget_layout = QHBoxLayout()
         bottom_widget.setLayout(bottom_widget_layout)
         main_layout.addWidget(bottom_widget)
-        self.radar = RadarWidget()
+        self.radar = radar_graph()
         self.radar_box = QHBoxLayout()
         self.radar_buttons = QVBoxLayout()
         self.radar_play_button = QPushButton()
@@ -148,11 +149,11 @@ class MainWindow(QMainWindow):
         self.radar_open_file_button.setMaximumHeight(30)
         self.radar_close_file_button.setMaximumHeight(30)
         self.radar_open_file_button.clicked.connect(self.browse_radar_file)
-        self.radar_play_button.clicked.connect(self.radar.playRadar)
-        self.radar_pause_button.clicked.connect(self.radar.pauseRadar)
-        self.radar_speed_up_button.clicked.connect(self.radar.increaseSpeed)
-        self.radar_speed_down_button.clicked.connect(self.radar.decreaseSpeed)
-        self.radar_close_file_button.clicked.connect(self.close_radar_file)
+        self.radar_play_button.clicked.connect(self.radar.play_radar)
+        self.radar_pause_button.clicked.connect(self.radar.pause_radar)
+        # self.radar_speed_up_button.clicked.connect(self.radar.increaseSpeed)
+        # self.radar_speed_down_button.clicked.connect(self.radar.decreaseSpeed)
+        self.radar_close_file_button.clicked.connect(self.radar.clear_radar)
         self.radar_play_button.setEnabled(False)
         self.radar_pause_button.setEnabled(False)
         self.radar_speed_up_button.setEnabled(False)
@@ -178,9 +179,6 @@ class MainWindow(QMainWindow):
         bottom_widget_layout.addWidget(self.glue_and_live_graph)
         bottom_widget_layout.addLayout(self.radar_box)
 
-
-
-
         # set main layout of central widget
         self.link_button.stateChanged.connect(self.link_button_changed)
         central_widget.setLayout(main_layout)
@@ -189,8 +187,7 @@ class MainWindow(QMainWindow):
             *{
                 padding:0px;
                 margin:0px;
-                color:#ffffff;
-                           
+                color:#ffffff;      
             }
             QPushButton{
                 padding:5px 20px;
@@ -214,7 +211,7 @@ class MainWindow(QMainWindow):
            
             #interpolation-order-combobox{
                 padding:3px 7px           
-                }
+            }
         """)
 
     def start_signals_glue(self):
