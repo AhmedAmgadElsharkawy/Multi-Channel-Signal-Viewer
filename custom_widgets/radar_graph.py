@@ -35,7 +35,7 @@ class radar_graph(QMainWindow):
         radar_layout.addWidget(self.canvas)
         self.setCentralWidget(radar_widget)
         
-        self.is_paused = False
+        self.is_paused = True
         self.current_frame = 0
 
         self.sweep_window = sweep_window
@@ -60,9 +60,10 @@ class radar_graph(QMainWindow):
         self.ax.set_ylim(min(self.radius), max(self.radius))
 
     def start_animation(self, from_frame=0):
+        self.is_paused = False
         if len(self.theta) > 0 and len(self.radius) > 0:
             self.anim = FuncAnimation(self.fig, self.update_plot, frames=np.arange(from_frame, len(self.theta)),
-                                      interval=50, repeat=False)
+                                      interval=10, repeat=False)
             self.canvas.draw()
         else:
             print("Error: Cannot start animation due to insufficient data.")
@@ -91,13 +92,14 @@ class radar_graph(QMainWindow):
         self.is_paused = True
         self.current_frame = 0
         self.anim.event_source.stop()
-
         self.line.set_data([], [])
-        
-        self.ax.cla()
+
+        self.ax.set_ylim(0, 1)
+        self.ax.set_xlim(0, 2 * np.pi)  
+
         self.ax.set_facecolor('black')
         self.ax.set_xticklabels([])
         self.ax.set_yticklabels([])
         self.ax.spines['polar'].set_visible(False)
-        
+
         self.canvas.draw()

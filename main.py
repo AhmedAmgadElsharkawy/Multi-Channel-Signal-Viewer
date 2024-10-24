@@ -153,7 +153,7 @@ class MainWindow(QMainWindow):
         self.radar_pause_button.clicked.connect(self.radar.pause_radar)
         # self.radar_speed_up_button.clicked.connect(self.radar.increaseSpeed)
         # self.radar_speed_down_button.clicked.connect(self.radar.decreaseSpeed)
-        self.radar_close_file_button.clicked.connect(self.radar.clear_radar)
+        self.radar_close_file_button.clicked.connect(self.clear_radar)
         self.radar_play_button.setEnabled(False)
         self.radar_pause_button.setEnabled(False)
         self.radar_speed_up_button.setEnabled(False)
@@ -446,7 +446,7 @@ class MainWindow(QMainWindow):
             self.radar_close_file_button.setEnabled(True)
             self.radar.read_csv(file_path)
 
-    def close_radar_file(self):
+    def clear_radar(self):
             self.radar_open_file_button.setEnabled(True)
             self.radar_play_button.setEnabled(False)
             self.radar_pause_button.setEnabled(False)
