@@ -86,7 +86,6 @@ class radar_graph(QMainWindow):
         if not self.is_paused:
             return
         self.is_paused = False
-        print(self.current_frame)
         self.start_animation(self.current_frame)
 
     def increase_speed(self):
