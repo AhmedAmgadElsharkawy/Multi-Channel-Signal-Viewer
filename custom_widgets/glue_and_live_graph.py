@@ -45,9 +45,8 @@ def fetch_live_signal_async(callback):
 
 
 class GlueAndLiveGraph(QWidget):
-    def __init__(self, main_app):
+    def __init__(self):
         super().__init__()
-        self.main_app = main_app
         self.fetching_rate = 5000
         self.is_paused = False
         self.is_rewind = False

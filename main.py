@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
         self.radar_box.addWidget(self.radar)
         self.radar_box.addLayout(self.radar_buttons)
 
-        self.glue_and_live_graph = GlueAndLiveGraph(self)
+        self.glue_and_live_graph = GlueAndLiveGraph()
         bottom_widget_layout.addWidget(self.glue_and_live_graph)
         bottom_widget_layout.addLayout(self.radar_box)
 
