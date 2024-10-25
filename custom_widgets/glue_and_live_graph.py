@@ -103,19 +103,17 @@ class GlueAndLiveGraph(QWidget):
 
         self.controls_widget_layout.addStretch()
 
-        pause_icon = QIcon()
-        play_icon = QIcon()
+        self.pause_icon = QIcon()
+        self.play_icon = QIcon()
         export_icon = QIcon()
-        pause_icon.addPixmap(QPixmap("Images/pause.png"))
-        play_icon.addPixmap(QPixmap("Images/play.png"))
+        self.pause_icon.addPixmap(QPixmap("Images/pause.png"))
+        self.play_icon.addPixmap(QPixmap("Images/play.png"))
         export_icon.addPixmap(QPixmap("Images/export.png"))
         
 
         self.graph_controls_buttons_layout = QVBoxLayout()
-        self.play_button = QPushButton()
-        self.pause_button = QPushButton()
-        self.play_button.setIcon(play_icon)
-        self.pause_button.setIcon(pause_icon)
+        self.play_and_pause_button = QPushButton()
+        self.play_and_pause_button.setIcon(self.pause_icon)
         self.interpolation_order_combobox = QComboBox()
         self.interpolation_orders = [
             "Nearest",
@@ -138,16 +136,14 @@ class GlueAndLiveGraph(QWidget):
         self.snapshot_button.setVisible(False)
         self.export_button = QPushButton()
         self.export_button.setIcon(export_icon)
-        self.graph_controls_buttons_layout.addWidget(self.play_button)
-        self.graph_controls_buttons_layout.addWidget(self.pause_button)
+        self.graph_controls_buttons_layout.addWidget(self.play_and_pause_button)
         self.graph_controls_buttons_layout.addWidget(self.interpolation_order_combobox)
         self.graph_controls_buttons_layout.addWidget(self.lock_button)
         self.graph_controls_buttons_layout.addWidget(self.unlock_button)
         self.graph_controls_buttons_layout.addWidget(self.snapshot_button)
         self.graph_controls_buttons_layout.addWidget(self.export_button)
         self.controls_widget_layout.addLayout(self.graph_controls_buttons_layout)
-        self.pause_button.clicked.connect(self.pause_signal)
-        self.play_button.clicked.connect(self.play_signal)
+        self.play_and_pause_button.clicked.connect(self.pause_signal)
         self.snapshot_button.clicked.connect(self.take_snapshot)
         self.export_button.clicked.connect(self.export_pdf)
 
@@ -217,11 +213,15 @@ class GlueAndLiveGraph(QWidget):
             self.glue_and_live_plot.setXRange(self.index - self.window_size, self.index)
 
     def play_signal(self):
+        self.play_and_pause_button.setIcon(self.pause_icon)
+        self.play_and_pause_button.clicked.connect(self.pause_signal)
         self.is_paused = False
         self.is_rewind = False
         self.timer.start(self.fetching_rate)
 
     def pause_signal(self):
+        self.play_and_pause_button.setIcon(self.play_icon)
+        self.play_and_pause_button.clicked.connect(self.play_signal)
         self.is_paused = True
         self.timer.stop()
 
@@ -231,8 +231,7 @@ class GlueAndLiveGraph(QWidget):
          self.lock_button.setVisible(True)
          self.interpolation_order_combobox.setVisible(False)
          self.unlock_button.setVisible(False)
-         self.play_button.setVisible(False)
-         self.pause_button.setVisible(False)
+         self.play_and_pause_button.setVisible(False)
          self.export_button.setVisible(False)
          self.pause_signal()
          self.cropped_signal_curve1.setData(x1,y1)   
@@ -329,12 +328,10 @@ class GlueAndLiveGraph(QWidget):
             self.interpolation_order_combobox.setVisible(False)
             self.unlock_button.setVisible(False)
             self.lock_button.setVisible(False)
-            self.play_button.setVisible(True)
-            self.pause_button.setVisible(True)
+            self.play_and_pause_button.setVisible(True)
          else:
              self.lock_button.setVisible(False)
-             self.play_button.setVisible(False)
-             self.pause_button.setVisible(False)            
+             self.play_and_pause_button.setVisible(False) 
              if(self.glue_output_curve.getData()[0] is not None):
                 self.export_button.setVisible(True)
                 self.snapshot_button.setVisible(True)
