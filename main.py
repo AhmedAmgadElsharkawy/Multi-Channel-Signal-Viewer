@@ -61,8 +61,8 @@ class MainWindow(QMainWindow):
         self.line_container.addWidget(self.link_options_widget)
         self.line_container.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.link_options_widget.setVisible(False)
-        pause_icon = QIcon()
-        play_icon = QIcon()
+        self.pause_icon = QIcon()
+        self.play_icon = QIcon()
         add_signal_icon = QIcon()
         rewind_button_icon = QIcon()
         clear_icon = QIcon()
@@ -70,31 +70,27 @@ class MainWindow(QMainWindow):
         speed_down_icon = QIcon()
         delete_icon = QIcon()
         add_signal_icon.addPixmap(QPixmap("Images/plus.png"))
-        pause_icon.addPixmap(QPixmap("Images/pause.png"))
-        play_icon.addPixmap(QPixmap("Images/play.png"))
+        self.pause_icon.addPixmap(QPixmap("Images/pause.png"))
+        self.play_icon.addPixmap(QPixmap("Images/play.png"))
         rewind_button_icon.addPixmap(QPixmap("Images/rewind.png"))
         clear_icon.addPixmap(QPixmap("Images/clean.png"))
         speed_up_icon.addPixmap(QPixmap("Images/forward-button.png"))
         speed_down_icon.addPixmap(QPixmap("Images/rewind-button.png"))
         delete_icon.addPixmap(QPixmap("Images/x.png"))
-        self.pause_link = QPushButton(self)
-        self.play_link = QPushButton(self)
+        self.play_and_pause_link = QPushButton(self)
         self.speed_up_link = QPushButton(self)
         self.speed_down_link = QPushButton(self)
         self.rewind_link = QPushButton(self)
-        self.pause_link.setIcon(pause_icon)
-        self.play_link.setIcon(play_icon)
+        self.play_and_pause_link.setIcon(self.pause_icon)
         self.speed_up_link.setIcon(speed_up_icon)
         self.speed_down_link.setIcon(speed_down_icon)
         self.rewind_link.setIcon(rewind_button_icon)
 
-        self.link_options.addWidget(self.pause_link)
-        self.link_options.addWidget(self.play_link)
+        self.link_options.addWidget(self.play_and_pause_link)
         self.link_options.addWidget(self.rewind_link)
         self.link_options.addWidget(self.speed_up_link)
         self.link_options.addWidget(self.speed_down_link)
-        self.pause_link.clicked.connect(self.pasue_linked_signals)
-        self.play_link.clicked.connect(self.play_linked_signals)
+        self.play_and_pause_link.clicked.connect(self.pasue_linked_signals)
         self.speed_up_link.clicked.connect(self.speed_up_linked_signals)
         self.speed_down_link.clicked.connect(self.speed_down_linked_signals)
         self.rewind_link.clicked.connect(self.rewind_linked_signals)
@@ -162,8 +158,8 @@ class MainWindow(QMainWindow):
         self.radar_speed_up_button.setEnabled(False)
         self.radar_speed_down_button.setEnabled(False)
         self.radar_close_file_button.setEnabled(False)
-        self.radar_play_button.setIcon(play_icon)
-        self.radar_pause_button.setIcon(pause_icon)
+        self.radar_play_button.setIcon(self.play_icon)
+        self.radar_pause_button.setIcon(self.pause_icon)
         self.radar_speed_up_button.setIcon(speed_up_icon)
         self.radar_speed_down_button.setIcon(speed_down_icon)
         self.radar_open_file_button.setIcon(add_signal_icon)
@@ -250,8 +246,6 @@ class MainWindow(QMainWindow):
         self.rectangle_plot2.disable_props()
         # self.glue_and_live_graph.disable_controls()
 
-
-
     def cancel_signals_glue(self):
         self.rectangle_plot1.linear_region_item.setVisible(False)
         self.rectangle_plot2.linear_region_item.setVisible(False)
@@ -281,7 +275,6 @@ class MainWindow(QMainWindow):
         self.rectangle_plot1.enable_props()
         self.rectangle_plot2.enable_controls_buttons()
         self.rectangle_plot2.enable_props()
-
 
     def crop_signals(self):
         signal_region1 = self.rectangle_plot1.linear_region_item.getRegion()
@@ -320,8 +313,6 @@ class MainWindow(QMainWindow):
         self.glue_and_live_graph.disable_controls()
         self.glue_button.setVisible(True)
         
-
-        
     def update_glue_button(self):
         if self.rectangle_plot1.signals_combobox.currentIndex() >=0 and self.rectangle_plot2.signals_combobox.currentIndex() >=0:
             self.glue_button.setEnabled(True)
@@ -331,11 +322,6 @@ class MainWindow(QMainWindow):
             self.link_button.setEnabled(False)
             self.link_button.setCheckState(Qt.CheckState.Unchecked)
     
-
-        
-
-
-
     def link_button_changed(self):
         sender = self.sender()
         if sender.isChecked():
@@ -349,6 +335,8 @@ class MainWindow(QMainWindow):
             self.rectangle_plot1.disable_controls_buttons()
             self.rectangle_plot2.disable_controls_buttons()
         else:
+            self.play_and_pause_link.setIcon(self.pause_icon)
+            self.play_and_pause_link.clicked.connect(self.pasue_linked_signals)
             self.rectangle_plot1.enable_controls_buttons()
             self.rectangle_plot2.enable_controls_buttons()
             self.link_options_widget.setVisible(False)
@@ -358,10 +346,14 @@ class MainWindow(QMainWindow):
             self.rectangle_plot2.rectangle_plot.getViewBox().sigYRangeChanged.disconnect(self.synchronizePosGraph2)
 
     def pasue_linked_signals(self):
+        self.play_and_pause_link.setIcon(self.play_icon)
+        self.play_and_pause_link.clicked.connect(self.play_linked_signals)
         self.rectangle_plot1.pauseSignals()
         self.rectangle_plot2.pauseSignals()
     
     def play_linked_signals(self):
+        self.play_and_pause_link.setIcon(self.pause_icon)
+        self.play_and_pause_link.clicked.connect(self.pasue_linked_signals)
         self.rectangle_plot1.playSignals()
         self.rectangle_plot2.playSignals()
 
@@ -375,6 +367,8 @@ class MainWindow(QMainWindow):
         self.rectangle_plot2.decreaseSpeed()
 
     def rewind_linked_signals(self):
+        self.play_and_pause_link.setIcon(self.pause_icon)
+        self.play_and_pause_link.clicked.connect(self.pasue_linked_signals)
         self.rectangle_plot1.rewindSignals()
         self.rectangle_plot2.rewindSignals()
 
