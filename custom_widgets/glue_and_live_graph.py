@@ -113,6 +113,7 @@ class GlueAndLiveGraph(QWidget):
 
         self.graph_controls_buttons_layout = QVBoxLayout()
         self.play_and_pause_button = QPushButton()
+        self.play_and_pause_button.setFixedSize(77, 30)
         self.play_and_pause_button.setIcon(self.pause_icon)
         self.interpolation_order_combobox = QComboBox()
         self.interpolation_orders = [
@@ -176,8 +177,7 @@ class GlueAndLiveGraph(QWidget):
 
     def update_signal(self):
         if not self.is_paused:
-            # fetch_live_signal_async(self.process_new_price)
-            pass
+            fetch_live_signal_async(self.process_new_price)
 
     def process_new_price(self, current_price):
         if current_price is not None:
@@ -328,6 +328,7 @@ class GlueAndLiveGraph(QWidget):
             self.interpolation_order_combobox.setVisible(False)
             self.unlock_button.setVisible(False)
             self.lock_button.setVisible(False)
+            self.snapshot_button.setVisible(False)
             self.play_and_pause_button.setVisible(True)
          else:
              self.lock_button.setVisible(False)
