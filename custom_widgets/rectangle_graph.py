@@ -132,7 +132,7 @@ class RectangleGraph(QWidget):
 
         # Create buttons
         self.insert_button = QPushButton()
-        self.play_button = QPushButton()
+        self.play_and_pause_button = QPushButton()
         self.pause_button = QPushButton()
         self.clear_button = QPushButton()
         self.rewind_button = QPushButton()
@@ -142,25 +142,23 @@ class RectangleGraph(QWidget):
         self.insert_button.setEnabled(True)
 
         # Add buttons to the layout
-        pause_icon = QIcon(); play_icon = QIcon(); add_signal_icon = QIcon(); 
+        self.pause_icon = QIcon(); self.play_icon = QIcon(); add_signal_icon = QIcon(); 
         rewind_button_icon = QIcon(); clear_icon = QIcon(); speed_up_icon = QIcon(); speed_down_icon = QIcon()
         add_signal_icon.addPixmap(QPixmap("Images/plus.png"))
-        pause_icon.addPixmap(QPixmap("Images/pause.png"))
-        play_icon.addPixmap(QPixmap("Images/play.png"))
+        self.pause_icon.addPixmap(QPixmap("Images/pause.png"))
+        self.play_icon.addPixmap(QPixmap("Images/play.png"))
         rewind_button_icon.addPixmap(QPixmap("Images/rewind.png"))
         clear_icon.addPixmap(QPixmap("Images/clean.png"))
         speed_up_icon.addPixmap(QPixmap("Images/forward-button.png"))
         speed_down_icon.addPixmap(QPixmap("Images/rewind-button.png"))
         self.insert_button.setIcon(add_signal_icon)
-        self.play_button.setIcon(play_icon)
-        self.pause_button.setIcon(pause_icon)
+        self.play_and_pause_button.setIcon(self.pause_icon)
         self.rewind_button.setIcon(rewind_button_icon)
         self.clear_button.setIcon(clear_icon)
         self.speed_up_button.setIcon(speed_up_icon)
         self.speed_down_button.setIcon(speed_down_icon)
         rectangle_plot_controls.addWidget(self.insert_button)
-        rectangle_plot_controls.addWidget(self.play_button)
-        rectangle_plot_controls.addWidget(self.pause_button)
+        rectangle_plot_controls.addWidget(self.play_and_pause_button)
         rectangle_plot_controls.addWidget(self.rewind_button)
         rectangle_plot_controls.addWidget(self.clear_button)
         rectangle_plot_controls.addWidget(self.speed_up_button)
@@ -197,7 +195,7 @@ class RectangleGraph(QWidget):
         # Connect insert button to file browser
         self.insert_button.clicked.connect(self.browse_file)
         self.pause_button.clicked.connect(self.pauseSignals)
-        self.play_button.clicked.connect(self.playSignals)
+        self.play_and_pause_button.clicked.connect(self.pauseSignals)
         self.speed_up_button.clicked.connect(self.increaseSpeed)
         self.speed_down_button.clicked.connect(self.decreaseSpeed)
         self.clear_button.clicked.connect(self.clearSignals)
@@ -277,6 +275,8 @@ class RectangleGraph(QWidget):
         self.timer.stop()
         self.signalSpeed = 20
         self.isRunning = True
+        self.play_and_pause_button.setIcon(self.pause_icon)
+        self.play_and_pause_button.clicked.connect(self.pauseSignals)
         self.signals_combobox.addItem(signal.label,userData=len(self.signals)-1)
 
         
@@ -320,9 +320,13 @@ class RectangleGraph(QWidget):
 
     def pauseSignals(self):
         self.isRunning = False
+        self.play_and_pause_button.setIcon(self.play_icon)
+        self.play_and_pause_button.clicked.connect(self.playSignals)
 
     def playSignals(self):
         self.isRunning = True
+        self.play_and_pause_button.setIcon(self.pause_icon)
+        self.play_and_pause_button.clicked.connect(self.pauseSignals)
 
     def increaseSpeed(self):
         self.timer.stop()
@@ -360,6 +364,8 @@ class RectangleGraph(QWidget):
         self.rectangle_plot.setYRange(self.yMinLimit, self.yMaxLimit)
         self.rectangle_plot.setLimits(xMin=0, xMax=1)
         self.isRunning = True
+        self.play_and_pause_button.setIcon(self.pause_icon)
+        self.play_and_pause_button.clicked.connect(self.pauseSignals)
         self.timer.start(self.signalSpeed)
         
     def on_signal_selected(self):
@@ -464,7 +470,7 @@ class RectangleGraph(QWidget):
 
     def enable_controls_buttons(self):
         self.insert_button.setEnabled(True)
-        self.play_button.setEnabled(True)
+        self.play_and_pause_button.setEnabled(True)
         self.pause_button.setEnabled(True) 
         self.clear_button.setEnabled(True) 
         self.rewind_button.setEnabled(True)
@@ -473,7 +479,7 @@ class RectangleGraph(QWidget):
     
     def disable_controls_buttons(self):
         self.insert_button.setEnabled(False)
-        self.play_button.setEnabled(False)
+        self.play_and_pause_button.setEnabled(False)
         self.pause_button.setEnabled(False) 
         self.clear_button.setEnabled(False) 
         self.rewind_button.setEnabled(False)
