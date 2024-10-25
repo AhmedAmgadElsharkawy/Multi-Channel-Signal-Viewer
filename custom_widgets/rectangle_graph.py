@@ -133,7 +133,6 @@ class RectangleGraph(QWidget):
         # Create buttons
         self.insert_button = QPushButton()
         self.play_and_pause_button = QPushButton()
-        self.pause_button = QPushButton()
         self.clear_button = QPushButton()
         self.rewind_button = QPushButton()
         self.speed_up_button = QPushButton()
@@ -151,6 +150,12 @@ class RectangleGraph(QWidget):
         clear_icon.addPixmap(QPixmap("Images/clean.png"))
         speed_up_icon.addPixmap(QPixmap("Images/forward-button.png"))
         speed_down_icon.addPixmap(QPixmap("Images/rewind-button.png"))
+        self.insert_button.setFixedSize(60, 25)
+        self.play_and_pause_button.setFixedSize(60, 25)
+        self.clear_button.setFixedSize(60, 25)
+        self.rewind_button.setFixedSize(60, 25)
+        self.speed_up_button.setFixedSize(60, 25)
+        self.speed_down_button.setFixedSize(60, 25)
         self.insert_button.setIcon(add_signal_icon)
         self.play_and_pause_button.setIcon(self.pause_icon)
         self.rewind_button.setIcon(rewind_button_icon)
@@ -194,7 +199,6 @@ class RectangleGraph(QWidget):
 
         # Connect insert button to file browser
         self.insert_button.clicked.connect(self.browse_file)
-        self.pause_button.clicked.connect(self.pauseSignals)
         self.play_and_pause_button.clicked.connect(self.pauseSignals)
         self.speed_up_button.clicked.connect(self.increaseSpeed)
         self.speed_down_button.clicked.connect(self.decreaseSpeed)
@@ -471,7 +475,6 @@ class RectangleGraph(QWidget):
     def enable_controls_buttons(self):
         self.insert_button.setEnabled(True)
         self.play_and_pause_button.setEnabled(True)
-        self.pause_button.setEnabled(True) 
         self.clear_button.setEnabled(True) 
         self.rewind_button.setEnabled(True)
         self.speed_up_button.setEnabled(True)
@@ -480,7 +483,6 @@ class RectangleGraph(QWidget):
     def disable_controls_buttons(self):
         self.insert_button.setEnabled(False)
         self.play_and_pause_button.setEnabled(False)
-        self.pause_button.setEnabled(False) 
         self.clear_button.setEnabled(False) 
         self.rewind_button.setEnabled(False)
         self.speed_up_button.setEnabled(False)
