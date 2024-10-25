@@ -540,6 +540,8 @@ class GlueAndLiveGraph(QWidget):
 
         pdf.save()
         self.snapshots_array.clear()
+        self.snapshots_statistics_array.clear()
+        print(self.snapshots_statistics_array)
 
 
 
