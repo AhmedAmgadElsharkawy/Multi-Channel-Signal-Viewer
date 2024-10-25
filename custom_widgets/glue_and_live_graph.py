@@ -55,6 +55,7 @@ class GlueAndLiveGraph(QWidget):
         self.show_signal = True
         self.auto_scroll_enabled = True  
         self.snapshots_array = []
+        self.snapshots_statistics_array = []
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_signal)
@@ -179,7 +180,8 @@ class GlueAndLiveGraph(QWidget):
 
     def update_signal(self):
         if not self.is_paused:
-            fetch_live_signal_async(self.process_new_price)
+            # fetch_live_signal_async(self.process_new_price)
+            pass
 
     def process_new_price(self, current_price):
         if current_price is not None:
@@ -456,7 +458,18 @@ class GlueAndLiveGraph(QWidget):
         self.lock_button.setVisible(True)
 
     def take_snapshot(self):
-        snapshot = exporters.ImageExporter(self.glue_and_live_plot.scene())        
+        left_x_pos, right_x_pos = self.glue_and_live_plot.getViewBox().viewRange()[0]   
+        glue_x_data, glue_y_data = self.glue_output_curve.getData()
+        snapshot_data = [[], []]
+
+        for i in range(len(glue_x_data)):
+            if glue_x_data[i] >= left_x_pos and glue_x_data[i] <= right_x_pos:
+                snapshot_data[1].append(glue_y_data[i])
+        
+        snapshot_statistics = self.calculate_signal_statistics(snapshot_data)
+        self.snapshots_statistics_array.append(snapshot_statistics)
+
+        snapshot = exporters.ImageExporter(self.glue_and_live_plot.scene())
         snapshot.params.fileSuffix = 'png'
         curr_image_num = str(len(self.snapshots_array) + 1)
         snapshot_filename = "snapshot" + curr_image_num + ".png"
