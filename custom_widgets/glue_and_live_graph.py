@@ -496,17 +496,49 @@ class GlueAndLiveGraph(QWidget):
         pdf.drawImage(major_logo, 10, 725, width=112, height=45)
         pdf.drawImage(college_logo, 525, 705, width=70, height=70)
 
-        curr_img_pos = 360
+        curr_pos = 360
 
         for i in range(len(self.snapshots_array)):
-            if curr_img_pos < 100:
-                curr_img_pos = 500
-                pdf.showPage()
             curr_img_file = Image.open(self.snapshots_array[i])
             curr_img = ImageReader(curr_img_file)
-            pdf.drawImage(curr_img, 10, curr_img_pos, width=590, height=150)
+            pdf.drawImage(curr_img, 10, curr_pos, width=590, height=150)
             os.remove(self.snapshots_array[i])
-            curr_img_pos -= 200
+            if i == 0:
+                curr_pos -= 200
+            else :
+                curr_pos -= 250
+            data = [['Statistic', 'Value']]
+            stats_items = list(self.snapshots_statistics_array[i].items())
+            for i in range(0, len(stats_items)):
+                pdf.setFont("Helvetica", 24)
+                pdf.drawCentredString(320, curr_pos + 120, "Graph Statistics")
+                row = []
+                for j in range(1):
+                    if i + j < len(stats_items):
+                        row.append(stats_items[i + j][0])
+                        row.append(str(stats_items[i + j][1]))
+                    else:
+                        row.append('') 
+                        row.append('')
+                data.append(row)
+                col_widths = [200, 200]
+                table = Table(data, colWidths=col_widths)
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 12),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12), 
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige), 
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+            table.wrapOn(pdf, 400, 400)
+            table.drawOn(pdf, 120, curr_pos)
+            if i + 1 != len(self.snapshots_array):
+                pdf.showPage()
+                curr_pos = 400
+
 
         pdf.save()
         self.snapshots_array.clear()
