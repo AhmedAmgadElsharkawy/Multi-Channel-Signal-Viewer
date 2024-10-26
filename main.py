@@ -248,7 +248,6 @@ class MainWindow(QMainWindow):
         # self.choose_glue_signal2.hide()
         self.cancel_glue_button.hide()
         self.crop_signals_button.hide()
-        self.glue_and_live_graph.snapshot_button.setVisible(False)
 
         signal1_index = self.rectangle_plot1.signals_combobox.currentIndex()
         signal2_index = self.rectangle_plot2.signals_combobox.currentIndex()

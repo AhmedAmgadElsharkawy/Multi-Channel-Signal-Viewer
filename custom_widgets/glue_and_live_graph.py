@@ -454,6 +454,7 @@ class GlueAndLiveGraph(QWidget):
         self.plot_cropped_signals(x1,y1,x2,y2,color1,color2)
         self.disable_controls()
         self.lock_button.setVisible(True)
+        self.snapshot_button.setVisible(False)
 
     def take_snapshot(self):
         left_x_pos, right_x_pos = self.glue_and_live_plot.getViewBox().viewRange()[0]   
@@ -537,11 +538,9 @@ class GlueAndLiveGraph(QWidget):
                 pdf.showPage()
                 curr_pos = 400
 
-
         pdf.save()
         self.snapshots_array.clear()
-
-
+        self.snapshots_statistics_array.clear()
 
     def calculate_signal_statistics(self, signal):
         """Calculate mean, std, duration, min, and max values for the signal."""
