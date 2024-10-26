@@ -170,7 +170,7 @@ class GlueAndLiveGraph(QWidget):
 
         self.setStyleSheet("""
             QPushButton{
-                padding:5px 20px
+                padding:5px 10px
             }
         """)
 
