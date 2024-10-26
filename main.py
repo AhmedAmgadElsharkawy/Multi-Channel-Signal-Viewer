@@ -268,6 +268,8 @@ class MainWindow(QMainWindow):
         self.rectangle_plot2.enable_props()
 
     def crop_signals(self):
+        self.glue_and_live_graph.glue_radio_button.setChecked(True)
+        self.glue_and_live_graph.glue_and_live_plot.clear()
         signal_region1 = self.rectangle_plot1.linear_region_item.getRegion()
         signal_region2 = self.rectangle_plot2.linear_region_item.getRegion()
 
@@ -303,6 +305,7 @@ class MainWindow(QMainWindow):
         self.glue_and_live_graph.plot_cropped_signals(new_x1,new_y1,new_x2,new_y2,signal1.color,signal2.color)
         self.glue_and_live_graph.disable_controls()
         self.glue_button.setVisible(True)
+        self.glue_and_live_graph.snapshot_button.setVisible(False)
         
     def update_glue_button(self):
         if self.rectangle_plot1.signals_combobox.currentIndex() >=0 and self.rectangle_plot2.signals_combobox.currentIndex() >=0:

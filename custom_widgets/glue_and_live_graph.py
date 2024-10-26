@@ -170,10 +170,17 @@ class GlueAndLiveGraph(QWidget):
 
         self.setStyleSheet("""
             QPushButton{
-                padding:5px 10px
+                padding:5px 9px
+            }
+            QComboBox{
+                padding:3px 5px               
             }
         """)
 
+
+    def format_y_value(self,value):
+        int_value =  int(value/10)
+        return int_value/100
 
     def update_signal(self):
         if not self.is_paused:
@@ -181,7 +188,7 @@ class GlueAndLiveGraph(QWidget):
 
     def process_new_price(self, current_price):
         if current_price is not None:
-            self.full_signal_data.append(current_price)
+            self.full_signal_data.append(self.format_y_value(current_price))
             self.full_time_data.append(self.index)
             self.index += 1
             self.live_curve.setData(self.full_time_data, self.full_signal_data)
@@ -268,6 +275,8 @@ class GlueAndLiveGraph(QWidget):
 
 
     def open_glue_signal(self):
+        self.glue_and_live_plot.setTitle("Glue Signals Output", size='10pt')  
+        self.glue_and_live_plot.setLabel('left', '')
         self.timer.stop()
         self.glue_and_live_plot.removeItem(self.live_curve)
         self.glue_and_live_plot.removeItem(self.glue_output_curve)
@@ -285,6 +294,8 @@ class GlueAndLiveGraph(QWidget):
         self.enable_controls()
 
     def run_live_signal(self):
+        self.glue_and_live_plot.setTitle("Bitcoin price from CoinAPI.io", size='10pt') 
+        self.glue_and_live_plot.setLabel('left', 'price (K USD)')
         self.play_signal()
         self.glue_and_live_plot.removeItem(self.glue_output_curve)
         self.glue_and_live_plot.removeItem(self.live_curve)
