@@ -173,7 +173,11 @@ class GlueAndLiveGraph(QWidget):
                 padding:5px 9px
             }
             QComboBox{
-                padding:3px 5px               
+                padding:3px 5px;
+                background-color:#2d2d2d              
+            }
+            QComboBox QAbstractItemView {
+                background-color: #2d2d2d; 
             }
         """)
 

@@ -203,6 +203,12 @@ class MainWindow(QMainWindow):
             #interpolation-order-combobox{
                 padding:3px 7px           
             }
+            QComboBox{
+                background-color:#2d2d2d               
+            }
+            QComboBox QAbstractItemView {
+                background-color: #2d2d2d; 
+            }
         """)
 
     def start_signals_glue(self):
