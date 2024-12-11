@@ -16,6 +16,8 @@ A desktop app that provides real-time visualization and allows users to load and
 
 ## Live Demo
 
+https://github.com/user-attachments/assets/a1eb4c53-2038-4215-99a0-6073cafcb01d
+
 ## Features
 
 - **Multi Channel**: You can browse your PC to open multiple signal files in more than one port.
